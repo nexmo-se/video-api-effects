@@ -104,7 +104,7 @@ export abstract class BackgroundEffect extends Effect {
   protected _outputContext: CanvasRenderingContext2D;
 
   private _assetsPath: string;
-  private _currentMask: Uint8ClampedArray | Uint8Array | null = new Uint8ClampedArray();
+  private _currentMask: Uint8ClampedArray | Uint8Array | null = new Uint8ClampedArray(0);
   private _debounce: number = DEBOUNCE;
   private _dummyImageData: ImageData = new ImageData(1, 1);
   private _historyCount: number = HISTORY_COUNT;
