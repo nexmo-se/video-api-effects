@@ -1,5 +1,5 @@
 {
-  "name": "video-api-effects",
+  "name": "@vonage/video-effects",
   "version": "0.1.0",
   "description": "Library to add video effects",
   "main": "lib/index.ts",
@@ -11,7 +11,7 @@
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json -t stylish",
     "build-umd": "NODE_ENV=production webpack && npm run copy:library-to-sample-app",
     "copy:js-assets": "cp -r ./assets/* ./dist/build/",
-    "copy:library-to-sample-app": "mkdir -p ./examples/library && cp ./dist/video-effects.umd.js ./examples/library/video-effects.umd.js",
+    "copy:library-to-sample-app": "mkdir -p ./examples/library && cp ./dist/umd/vonage-video-effects.js ./examples/library/vonage-video-effects.js",
     "watch": "npm run build:version && nodemon"
   },
   "author": "Enrico Portolan",

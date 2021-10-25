@@ -21,7 +21,7 @@ export class BackgroundBlurEffect extends BackgroundEffect {
     // tslint:disable-next-line no-unused-variable 
   
     /**
-     * Construct a GaussianBlurBackgroundProcessor. Default values will be used for
+     * Construct a BackgroundEffect. Default values will be used for
      * any missing properties in [[BackgroundBlurEffectOptions]], and
      * invalid properties will be ignored.
      */

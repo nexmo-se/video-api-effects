@@ -1,4 +1,4 @@
-# Virtual Background Demo
+# Background Effect Demo
 
 ## Setup
 

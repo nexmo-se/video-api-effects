@@ -40,7 +40,6 @@ module.exports = {
   optimization: {
     minimize: true,
     minimizer: [
-      // This plugin option stops webpack moving the comments into a separate license file and leaves it prepended to the output:
       // https://stackoverflow.com/questions/64818489/webpack-omit-creation-of-license-txt-files
       new TerserPlugin({
         extractComments: false
@@ -48,10 +47,10 @@ module.exports = {
     ]
   },
   output: {
-    filename: 'video-effects.umd.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: 'vonage-video-effects.js',
+    path: path.resolve(__dirname, 'dist/umd'),
     library: {
-      name: 'VideoEspress',
+      name: 'VideoEffects',
       type: 'umd'
     }
   }

@@ -1,5 +1,5 @@
 /* import { ModelConfig, PersonInferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'; */
-import { Dimensions } from './types';
+import { InferenceDimensions } from './types';
 
 export const BLUR_FILTER_RADIUS = 15;
 export const DEBOUNCE = 2;
@@ -27,12 +27,13 @@ export const INFERENCE_CONFIG: PersonInferenceConfig = {
   segmentationThreshold: 0.75,
 }; */
 
-export const BODYPIX_INFERENCE_DIMENSIONS: Dimensions = {
-  width: 224,
-  height: 224,
-};
-
-export const WASM_INFERENCE_DIMENSIONS: Dimensions = {
-  width: 256,
-  height: 144,
+export const MODEL_WASM_INFERENCE_DIMENSIONS: InferenceDimensions = {
+    model96: {
+        height: 96,
+        width: 160
+    },
+    model144: {
+        height: 144,
+        width: 256
+    }
 };

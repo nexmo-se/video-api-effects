@@ -10,15 +10,10 @@ import {
 } from '../TimeWorker';
 
 import {
-  BODYPIX_INFERENCE_DIMENSIONS,
-  DEBOUNCE,
-  HISTORY_COUNT,
   MASK_BLUR_RADIUS,
-  MODEL_NAME,
-  PERSON_PROBABILITY_THRESHOLD,
   TFLITE_MODELS_SEG_LITE,
   TFLITE_SIMD_LOADER_NAME,
-  WASM_INFERENCE_DIMENSIONS
+  MODEL_WASM_INFERENCE_DIMENSIONS
 } from '../../constants';
 
 /**
@@ -26,7 +21,7 @@ import {
  */
 export interface BackgroundEffectOptions {
   /**
-   * The VideoProcessors load assets dynamically depending on certain browser features.
+   * The BackgroundEffect load assets dynamically depending on certain browser features.
    * You need to serve all the assets and provide the root path so they can be referenced properly.
    * These assets can be copied from the `dist/build` folder which you can add as part of your deployment process.
    * @example
@@ -36,7 +31,7 @@ export interface BackgroundEffectOptions {
    * <br/>
    *
    * ```ts
-   * const virtualBackground = new VirtualBackgroundProcessor({
+   * const virtualBackground = new BackgroundEffect({
    *   assetsPath: 'https://my-server-path/assets',
    *   backgroundImage: img,
    * });
@@ -48,7 +43,7 @@ export interface BackgroundEffectOptions {
    * <br/>
    *
    * ```ts
-   * const blurBackground = new GaussianBlurBackgroundProcessor({
+   * const blurBackground = new BackgroundEffect({
    *   assetsPath: 'https://my-server-path/assets'
    * });
    * await blurBackground.loadModel();
@@ -60,11 +55,6 @@ export interface BackgroundEffectOptions {
    * @private
    */
   debounce?: number;
-
-  /**
-   * @private
-   */
-  historyCount?: number;
 
   /**
    * @private
@@ -102,38 +92,19 @@ export interface BackgroundEffectOptions {
 export class BackgroundEffect {
   private _tflite: any;
   private _options: any = {};
-  private static segmentationDimensions = {
-    model96: {
-        height: 96,
-        width: 160
-    },
-    model144: {
-        height: 144,
-        width: 256
-    }
-  }
+  private static segmentationDimensions = MODEL_WASM_INFERENCE_DIMENSIONS
   
-  protected _inputVideoElement: any;
+  protected _inputVideoElement: HTMLVideoElement;
   protected _outputCanvasElement: HTMLCanvasElement;
   protected _outputCanvasCtx: CanvasRenderingContext2D | null;
 
   private _assetsPath: string;
-  private _currentMask:
-    | Uint8ClampedArray
-    | Uint8Array
-    | null = new Uint8ClampedArray(0);
-  private _debounce: number = DEBOUNCE;
-  private _inferenceDimensions: Dimensions = WASM_INFERENCE_DIMENSIONS;
-  private _inputCanvas: HTMLCanvasElement;
-  private _inputContext: CanvasRenderingContext2D;
   // tslint:disable-next-line no-unused-variable
   private _isSimdEnabled: boolean | null = null;
   private _maskBlurRadius: number = MASK_BLUR_RADIUS;
-  private _segmentationMask;
+  private _segmentationMask: ImageData;
   private _segmentationMaskCanvas: HTMLCanvasElement;
   private _segmentationMaskCtx: CanvasRenderingContext2D | null;
-  private _personProbabilityThreshold: number = PERSON_PROBABILITY_THRESHOLD;
-  private _useWasm: boolean;
   // tslint:disable-next-line no-unused-variable
   /* private readonly _version: string = version; */
 
@@ -155,15 +126,6 @@ export class BackgroundEffect {
 
     this.maskBlurRadius = options.maskBlurRadius!;
     this._assetsPath = assetsPath;
-    this._personProbabilityThreshold =
-      options.personProbabilityThreshold! || PERSON_PROBABILITY_THRESHOLD;
-    this._useWasm =
-      typeof options.useWasm === 'boolean' ? options.useWasm : true;
-    this._inferenceDimensions =
-      options.inferenceDimensions! ||
-      (this._useWasm
-        ? WASM_INFERENCE_DIMENSIONS
-        : BODYPIX_INFERENCE_DIMENSIONS);
     this._inputVideoElement = document.createElement('video');
     this._outputCanvasElement = document.createElement('canvas');
     this._outputCanvasCtx = this._outputCanvasElement.getContext(
@@ -202,7 +164,7 @@ export class BackgroundEffect {
 
   /**
    * Load the segmentation model.
-   * Call this method before attaching the processor to ensure
+   * Call this method before attaching the effect to ensure
    * video frames are processed correctly.
    */
   async loadModel() {
@@ -241,9 +203,9 @@ export class BackgroundEffect {
     if (this._outputCanvasCtx) {
       this._outputCanvasCtx.globalCompositeOperation = 'copy';
       if (this._options.virtualBackground && this._options.virtualBackground.backgroundType === 'image') {
-        this._outputCanvasCtx.filter = 'blur(4px)';
+        this._outputCanvasCtx.filter = `blur(${this._maskBlurRadius}px)`;
       } else {
-        this._outputCanvasCtx.filter = 'blur(8px)';
+        this._outputCanvasCtx.filter = `blur(${this._maskBlurRadius}px)`;
       }
 
       this._outputCanvasCtx.drawImage(
@@ -282,8 +244,7 @@ export class BackgroundEffect {
             this._inputVideoElement.height
           ); */
       } else {
-        //this._outputCanvasCtx.filter = `blur(${this._options.virtualBackground.blurValue}px)`;
-        this._outputCanvasCtx.filter = `blur(10px)`;
+        this._outputCanvasCtx.filter = `blur(${this._options.virtualBackground.blurValue}px)`;
         this._outputCanvasCtx.drawImage(this._inputVideoElement, 0, 0);
       }
     }
@@ -294,12 +255,8 @@ export class BackgroundEffect {
    *
    * @returns {void}
    */
-  runInference() {
+  private runInference() {
     this._tflite._runInference();
-    const {
-      _inferenceDimensions: { width, height },
-      _tflite: tflite
-    } = this;
     const segmentationPixelCount = this._options.width * this._options.height;
     const outputMemoryOffset = this._tflite._getOutputMemoryOffset() / 4;
 
@@ -456,6 +413,14 @@ export class BackgroundEffect {
         console.error("[startEffect] Error:", err)
     }
     
+  }
+
+  stopEffect() {
+    this._maskFrameTimerWorker.postMessage({
+        id: CLEAR_TIMEOUT
+      });
+
+      this._maskFrameTimerWorker.terminate();
   }
 
   private _createJSScript(url: string): Promise<void> {

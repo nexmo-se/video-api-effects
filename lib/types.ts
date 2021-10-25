@@ -25,6 +25,14 @@
     height: number;
     width: number;
   }
+
+  /**
+   * @private
+   */
+   export interface InferenceDimensions {
+    model96: Dimensions;
+    model144: Dimensions;
+  }
   
   /**
    * ImageFit specifies the positioning of an image inside a viewport.

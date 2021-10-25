@@ -1,6 +1,6 @@
 {
-  "name": "twilio-video-processors-examples",
-  "version": "1.0.0",
+  "name": "@vonage/video-api-effects",
+  "version": "0.1.0",
   "description": "",
   "main": "server.js",
   "scripts": {
