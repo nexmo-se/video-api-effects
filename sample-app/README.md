@@ -8,7 +8,7 @@ Checkout the latest release tag (see the latest releases [here](https://github.c
 git checkout 1.0.0
 ```
 
-Then, run `npm install` from the `examples` folder. It will install the dependencies and run the application server.
+Then, run `npm install` from the `sample-app` folder. It will install the dependencies and run the application server.
 
 ## App (Chrome Only)
 

@@ -1,5 +1,5 @@
-import { BackgroundBlurEffect, BackgroundBlurEffectOptions,  } from './effects/background/backgroundBlurEffect';
-import { BackgroundEffect,  } from './effects/background/backgroundEffect';
+import { BackgroundBlurEffect, BackgroundBlurEffectOptions,  } from './effects/background/BackgroundBlurEffect';
+import { BackgroundEffect,  } from './effects/background/BackgroundEffect';
 import { isSupported } from './utils';
 
 window.OT = window.OT || {};
