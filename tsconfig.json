@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "inlineSources": true,
     "strict": true,
-    "outDir": "es5",
-    "resolveJsonModule": true
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "strictPropertyInitialization": false
   }
 }

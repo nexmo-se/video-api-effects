@@ -10,6 +10,6 @@
      * @param inputFrameBuffer - The source of the input frame to process.
      * @param outputFrameBuffer - The output frame buffer to use to draw the processed frame.
      */
-    abstract processFrame(inputFrameBuffer: OffscreenCanvas, outputFrameBuffer: HTMLCanvasElement): Promise<void> | void;
+    abstract processFrame(inputVideoMediaStream: MediaStreamTrack, outputFrameBuffer: HTMLCanvasElement): Promise<void> | void;
   }
   

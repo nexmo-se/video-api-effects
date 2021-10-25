@@ -1,26 +1,27 @@
-import { BackgroundBlurEffect, BackgroundBlurEffectOptions } from './effects/background/backgroundBlurEffect';
+import { BackgroundBlurEffect, BackgroundBlurEffectOptions,  } from './effects/background/backgroundBlurEffect';
+import { BackgroundEffect,  } from './effects/background/backgroundEffect';
 import { isSupported } from './utils';
 
-// window.Twilio = window.Twilio || {};
-/* window.Twilio.VideoProcessors = {
-  ...window.Twilio.VideoProcessors,
-  GaussianBlurBackgroundProcessor,
-  ImageFit,
-  isSupported,
-  version,
-  VirtualBackgroundProcessor,
+window.OT = window.OT || {};
+
+window.OT.VideoEffects = {
+    isSupported,
+    BackgroundBlurEffect,
+    BackgroundEffect
 };
- */
+
 
 const OTVideoEffects = {
     BackgroundBlurEffect, 
+    BackgroundEffect
 }
 
 
 
 export {
-OTVideoEffects,
+  OTVideoEffects,
   isSupported,
   BackgroundBlurEffect,
   BackgroundBlurEffectOptions,
+  BackgroundEffect
 };

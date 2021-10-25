@@ -48,8 +48,8 @@ export class BackgroundBlurEffect extends BackgroundEffect {
       this._blurFilterRadius = radius;
     }
   
-    protected _setBackground(inputFrame: OffscreenCanvas): void {
+    /* protected _setBackground(inputFrame: OffscreenCanvas): void {
       this._outputContext.filter = `blur(${this._blurFilterRadius}px)`;
       this._outputContext.drawImage(inputFrame, 0, 0);
-    }
+    } */
 }

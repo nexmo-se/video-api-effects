@@ -9,6 +9,9 @@
   "scripts": {
     "build": "tsc",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json -t stylish",
+    "build-umd": "NODE_ENV=production webpack && npm run copy:library-to-sample-app",
+    "copy:js-assets": "cp -r ./assets/* ./dist/build/",
+    "copy:library-to-sample-app": "mkdir -p ./examples/library && cp ./dist/video-effects.umd.js ./examples/library/video-effects.umd.js",
     "watch": "npm run build:version && nodemon"
   },
   "author": "Enrico Portolan",
@@ -16,12 +19,17 @@
   "types": "./es5/index.d.ts",
   "dependencies": {
     "@tensorflow/tfjs-backend-cpu": "^3.3.0",
-    "@tensorflow/tfjs-backend-webgl": "^3.2.0"
+    "@tensorflow/tfjs-backend-webgl": "^3.2.0",
+    "@tensorflow/tfjs-core": "^3.9.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.13",
+    "ts-loader": "^9.0.0",
     "ts-node": "^10.3.0",
+    "tsdx": "^0.14.1",
     "tsify": "^5.0.4",
-    "typescript": "^4.1.5"
+    "typescript": "^4.4.4",
+    "webpack": "^5.33.2",
+    "webpack-cli": "^4.7.2"
   }
 }

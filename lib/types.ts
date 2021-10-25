@@ -5,6 +5,7 @@
     interface Window {
       chrome: any;
       createTFLiteSIMDModule: () => Promise<any>;
+      OT: Object & { VideoEffects?: any };
     }
   }
   

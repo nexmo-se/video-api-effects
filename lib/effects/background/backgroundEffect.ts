@@ -1,8 +1,13 @@
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-cpu';
 /* import { ModelConfig, PersonInferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'; */
-import { Effect } from '../index';
 import { Dimensions } from '../../types';
+import {
+  CLEAR_TIMEOUT,
+  TIMEOUT_TICK,
+  SET_TIMEOUT,
+  timerWorkerScript
+} from '../TimeWorker';
 
 import {
   BODYPIX_INFERENCE_DIMENSIONS,
@@ -11,9 +16,9 @@ import {
   MASK_BLUR_RADIUS,
   MODEL_NAME,
   PERSON_PROBABILITY_THRESHOLD,
-  TFLITE_LOADER_NAME,
+  TFLITE_MODELS_SEG_LITE,
   TFLITE_SIMD_LOADER_NAME,
-  WASM_INFERENCE_DIMENSIONS,
+  WASM_INFERENCE_DIMENSIONS
 } from '../../constants';
 
 /**
@@ -88,48 +93,58 @@ export interface BackgroundEffectOptions {
   /**
    * @private
    */
-   useWasm?: boolean;
+  useWasm?: boolean;
 }
 
 /**
  * @private
  */
-export abstract class BackgroundEffect extends Effect {
-  private static _model: any = null;
-  /* private static async _loadModel(config: ModelConfig = MODEL_CONFIG): Promise<void> {
-    BackgroundEffect._model = await loadModel(config)
-      .catch((error: any) => console.error('Unable to load model.', error)) || null;
-  } */
-  protected _outputCanvas: HTMLCanvasElement;
-  protected _outputContext: CanvasRenderingContext2D;
+export class BackgroundEffect {
+  private _tflite: any;
+  private _options: any = {};
+  private static segmentationDimensions = {
+    model96: {
+        height: 96,
+        width: 160
+    },
+    model144: {
+        height: 144,
+        width: 256
+    }
+  }
+  
+  protected _inputVideoElement: any;
+  protected _outputCanvasElement: HTMLCanvasElement;
+  protected _outputCanvasCtx: CanvasRenderingContext2D | null;
 
   private _assetsPath: string;
-  private _currentMask: Uint8ClampedArray | Uint8Array | null = new Uint8ClampedArray(0);
+  private _currentMask:
+    | Uint8ClampedArray
+    | Uint8Array
+    | null = new Uint8ClampedArray(0);
   private _debounce: number = DEBOUNCE;
-  private _dummyImageData: ImageData = new ImageData(1, 1);
-  private _historyCount: number = HISTORY_COUNT;
-  /* private _inferenceConfig: PersonInferenceConfig = INFERENCE_CONFIG; */
   private _inferenceDimensions: Dimensions = WASM_INFERENCE_DIMENSIONS;
   private _inputCanvas: HTMLCanvasElement;
   private _inputContext: CanvasRenderingContext2D;
-  private _inputMemoryOffset: number = 0;
   // tslint:disable-next-line no-unused-variable
   private _isSimdEnabled: boolean | null = null;
   private _maskBlurRadius: number = MASK_BLUR_RADIUS;
-  private _maskCanvas: OffscreenCanvas;
-  private _maskContext: OffscreenCanvasRenderingContext2D;
-  private _masks: (Uint8ClampedArray | Uint8Array)[];
-  private _maskUsageCounter: number = 0;
-  private _outputMemoryOffset: number = 0;
+  private _segmentationMask;
+  private _segmentationMaskCanvas: HTMLCanvasElement;
+  private _segmentationMaskCtx: CanvasRenderingContext2D | null;
   private _personProbabilityThreshold: number = PERSON_PROBABILITY_THRESHOLD;
-  private _tflite: any;
   private _useWasm: boolean;
   // tslint:disable-next-line no-unused-variable
   /* private readonly _version: string = version; */
 
-  constructor(options: BackgroundEffectOptions) {
-    super();
+  private _maskFrameTimerWorker: any;
 
+  constructor(options: BackgroundEffectOptions) {
+    this._options = {
+        ...options,
+        ...this._isSimdEnabled ? BackgroundEffect.segmentationDimensions.model144 : BackgroundEffect.segmentationDimensions.model96,
+    }
+    console.log("BackgroundEffect Options", this._options)
     if (typeof options.assetsPath !== 'string') {
       throw new Error('assetsPath parameter is missing');
     }
@@ -140,21 +155,29 @@ export abstract class BackgroundEffect extends Effect {
 
     this.maskBlurRadius = options.maskBlurRadius!;
     this._assetsPath = assetsPath;
-    this._debounce = options.debounce! || DEBOUNCE;
-    this._historyCount = options.historyCount! || HISTORY_COUNT;
-    /* this._inferenceConfig = options.inferenceConfig! || INFERENCE_CONFIG; */
-    this._personProbabilityThreshold = options.personProbabilityThreshold! || PERSON_PROBABILITY_THRESHOLD;
-    this._useWasm = typeof options.useWasm === 'boolean' ? options.useWasm : true;
-    this._inferenceDimensions = options.inferenceDimensions! ||
-      (this._useWasm ? WASM_INFERENCE_DIMENSIONS : BODYPIX_INFERENCE_DIMENSIONS);
+    this._personProbabilityThreshold =
+      options.personProbabilityThreshold! || PERSON_PROBABILITY_THRESHOLD;
+    this._useWasm =
+      typeof options.useWasm === 'boolean' ? options.useWasm : true;
+    this._inferenceDimensions =
+      options.inferenceDimensions! ||
+      (this._useWasm
+        ? WASM_INFERENCE_DIMENSIONS
+        : BODYPIX_INFERENCE_DIMENSIONS);
+    this._inputVideoElement = document.createElement('video');
+    this._outputCanvasElement = document.createElement('canvas');
+    this._outputCanvasCtx = this._outputCanvasElement.getContext(
+      '2d'
+    ) as CanvasRenderingContext2D;
 
-    this._inputCanvas = document.createElement('canvas');
-    this._inputContext = this._inputCanvas.getContext('2d') as CanvasRenderingContext2D;
-    this._maskCanvas = new OffscreenCanvas(1, 1);
-    this._maskContext = this._maskCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-    this._outputCanvas = document.createElement('canvas');
-    this._outputContext = this._outputCanvas.getContext('2d') as CanvasRenderingContext2D;
-    this._masks = [];
+    this._segmentationMask = new ImageData(
+      this._options.width,
+      this._options.height
+    );
+    this._segmentationMaskCanvas = document.createElement('canvas');
+    this._segmentationMaskCanvas.width = this._options.width;
+    this._segmentationMaskCanvas.height = this._options.height;
+    this._segmentationMaskCtx = this._segmentationMaskCanvas.getContext('2d');
   }
 
   /**
@@ -169,7 +192,9 @@ export abstract class BackgroundEffect extends Effect {
    */
   set maskBlurRadius(radius: number) {
     if (typeof radius !== 'number' || radius < 0) {
-      console.warn(`Valid mask blur radius not found. Using ${MASK_BLUR_RADIUS} as default.`);
+      console.warn(
+        `Valid mask blur radius not found. Using ${MASK_BLUR_RADIUS} as default.`
+      );
       radius = MASK_BLUR_RADIUS;
     }
     this._maskBlurRadius = radius;
@@ -180,131 +205,257 @@ export abstract class BackgroundEffect extends Effect {
    * Call this method before attaching the processor to ensure
    * video frames are processed correctly.
    */
-   async loadModel() {
-    const [tflite, modelResponse ] = await Promise.all([
-        /* BackgroundEffect._loadModel(), */
+  async loadModel() {
+    const modelToLoad =  this._isSimdEnabled? TFLITE_MODELS_SEG_LITE.model144 : TFLITE_MODELS_SEG_LITE.model96 
+    const [tflite, modelResponse] = await Promise.all([
       this._loadTfLite(),
-      fetch(this._assetsPath + MODEL_NAME),
+      fetch(this._assetsPath + modelToLoad)
     ]);
+
+    console.log("ModelResponse", modelResponse)
 
     const model = await modelResponse.arrayBuffer();
     const modelBufferOffset = tflite._getModelBufferMemoryOffset();
     tflite.HEAPU8.set(new Uint8Array(model), modelBufferOffset);
     tflite._loadModel(model.byteLength);
 
-    this._inputMemoryOffset = tflite._getInputMemoryOffset() / 4;
-    this._outputMemoryOffset = tflite._getOutputMemoryOffset() / 4;
-
     this._tflite = tflite;
   }
 
+  // todo  NEW METHODS ============
+
   /**
-   * Apply a transform to the background of an input video frame and leaving
-   * the foreground (person(s)) untouched. Any exception detected will
-   * result in the frame being dropped.
-   * @param inputFrameBuffer - The source of the input frame to process.
-   * @param outputFrameBuffer - The output frame buffer to use to draw the processed frame.
+   * loadModel and initialize tflite.
+   * @param virtualBackground
    */
-  async processFrame(inputFrameBuffer: OffscreenCanvas, outputFrameBuffer: HTMLCanvasElement): Promise<void> {
-    if (!BackgroundEffect._model || !this._tflite) {
-      return;
-    }
-    if (!inputFrameBuffer || !outputFrameBuffer) {
-      throw new Error('Missing input or output frame buffer');
-    }
-
-    const inputFrame = inputFrameBuffer;
-    const { width: captureWidth, height: captureHeight } = inputFrame;
-    const { width: inferenceWidth, height: inferenceHeight } = this._inferenceDimensions;
-
-    if (this._outputCanvas !== outputFrameBuffer) {
-      this._outputCanvas = outputFrameBuffer;
-      this._outputContext = outputFrameBuffer.getContext('2d') as CanvasRenderingContext2D;
-    }
-
-    // Only set the canvas' dimensions if they have changed to prevent unnecessary redraw
-    let reInitDummyImage = false;
-    if (this._inputCanvas.width !== inferenceWidth) {
-      this._inputCanvas.width = inferenceWidth;
-      this._maskCanvas.width = inferenceWidth;
-      reInitDummyImage = true;
-    }
-    if (this._inputCanvas.height !== inferenceHeight) {
-      this._inputCanvas.height = inferenceHeight;
-      this._maskCanvas.height = inferenceHeight;
-      reInitDummyImage = true;
-    }
-    if (reInitDummyImage) {
-      this._dummyImageData = new ImageData(
-        new Uint8ClampedArray(inferenceWidth * inferenceHeight * 4),
-        inferenceWidth, inferenceHeight);
-    }
-
-    const personMask = await this._createPersonMask(inputFrame);
-
-
-    this._maskContext.putImageData(personMask, 0, 0);
-    this._outputContext.save();
-    this._outputContext.filter = `blur(${this._maskBlurRadius}px)`;
-    this._outputContext.globalCompositeOperation = 'copy';
-    this._outputContext.drawImage(this._maskCanvas, 0, 0, captureWidth, captureHeight);
-    this._outputContext.filter = 'none';
-    this._outputContext.globalCompositeOperation = 'source-in';
-    this._outputContext.drawImage(inputFrame, 0, 0, captureWidth, captureHeight);
-    this._outputContext.globalCompositeOperation = 'destination-over';
-    this._setBackground(inputFrame);
-    this._outputContext.restore();
+  async createVirtualBackgroundEffect(virtualBackground: any): Promise<any> {
+    // return new BackgroundEffect(tflite, options);
   }
 
-  protected abstract _setBackground(inputFrame: OffscreenCanvas): void;
+  /**
+   * Represents the run post processing.
+   *
+   * @returns {void}
+   */
+  runPostProcessing() {
+    if (this._outputCanvasCtx) {
+      this._outputCanvasCtx.globalCompositeOperation = 'copy';
+      if (this._options.virtualBackground && this._options.virtualBackground.backgroundType === 'image') {
+        this._outputCanvasCtx.filter = 'blur(4px)';
+      } else {
+        this._outputCanvasCtx.filter = 'blur(8px)';
+      }
 
-  private _addMask(mask: Uint8ClampedArray | Uint8Array) {
-    if (this._masks.length >= this._historyCount) {
-      this._masks.splice(0, this._masks.length - this._historyCount + 1);
-    }
-    this._masks.push(mask);
-  }
+      this._outputCanvasCtx.drawImage(
+        this._segmentationMaskCanvas,
+        0,
+        0,
+        this._options.width,
+        this._options.height,
+        0,
+        0,
+        this._inputVideoElement.width,
+        this._inputVideoElement.height
+      );
+      this._outputCanvasCtx.globalCompositeOperation = 'source-in';
+      this._outputCanvasCtx.filter = 'none';
 
-  private _applyAlpha(imageData: ImageData) {
-    const weightedSum = this._masks.reduce((sum, mask, j) => sum + (j + 1) * (j + 1), 0);
-    const pixels = imageData.height * imageData.width;
-    for (let i = 0; i < pixels; i++) {
-      const w = this._masks.reduce((sum, mask, j) => sum + mask[i] * (j + 1) * (j + 1), 0) / weightedSum;
-      imageData.data[i * 4 + 3] = Math.round(w * 255);
+      // Draw the foreground video.
+      //
+
+      this._outputCanvasCtx.drawImage(this._inputVideoElement, 0, 0);
+
+      // Draw the background.
+      //
+
+      this._outputCanvasCtx.globalCompositeOperation = 'destination-over';
+      //      console.log('this._options.virtualBackground.backgroundType :', this._options.virtualBackground.backgroundType);
+
+      if (this._options.virtualBackground && this._options.virtualBackground.backgroundType === 'image') {
+        // todo for now only blur
+        /* this._outputCanvasCtx.drawImage(
+            this._virtualImage,
+            
+            0,
+            0,
+            this._inputVideoElement.width,
+            this._inputVideoElement.height
+          ); */
+      } else {
+        //this._outputCanvasCtx.filter = `blur(${this._options.virtualBackground.blurValue}px)`;
+        this._outputCanvasCtx.filter = `blur(10px)`;
+        this._outputCanvasCtx.drawImage(this._inputVideoElement, 0, 0);
+      }
     }
   }
 
   /**
-   * 
-   * @param inputFrame This function takes an inputFrame 
-   * @returns 
+   * Represents the run Tensorflow Interference.
+   *
+   * @returns {void}
    */
-  private async _createPersonMask(inputFrame: OffscreenCanvas): Promise<ImageData> {
-    let imageData = this._dummyImageData;
-    const shouldRunInference = this._maskUsageCounter < 1;
-    // I think they use a kind of debounce logic
-    if (shouldRunInference) {
-      imageData = this._getResizedInputImageData(inputFrame);
+  runInference() {
+    this._tflite._runInference();
+    const {
+      _inferenceDimensions: { width, height },
+      _tflite: tflite
+    } = this;
+    const segmentationPixelCount = this._options.width * this._options.height;
+    const outputMemoryOffset = this._tflite._getOutputMemoryOffset() / 4;
+
+    for (let i = 0; i < segmentationPixelCount; i++) {
+      const background = this._tflite.HEAPF32[outputMemoryOffset + (i * 2)];
+      const person = this._tflite.HEAPF32[outputMemoryOffset + (i * 2) + 1];
+      const shift = Math.max(background, person);
+      const backgroundExp = Math.exp(background - shift);
+      const personExp = Math.exp(person - shift);
+
+      // Sets only the alpha component of each pixel.
+      this._segmentationMask.data[(i * 4)  + 3] =
+        (255 * personExp) / (backgroundExp + personExp);
     }
-    if (shouldRunInference) {
-      this._currentMask = this._useWasm
-        ? this._runTFLiteInference(imageData) : null;
-        /* : await this._runBodyPixInference(imageData); */
-      this._maskUsageCounter = this._debounce;
+    if (this._segmentationMaskCtx) {
+      this._segmentationMaskCtx.putImageData(this._segmentationMask, 0, 0);
     }
-    if (this._currentMask) {
-        this._addMask(this._currentMask);
-        this._applyAlpha(imageData);
-        this._maskUsageCounter--;
-    }
-    return imageData;
   }
 
-  private _getResizedInputImageData(inputFrame: OffscreenCanvas): ImageData {
-    const { width, height } = this._inputCanvas;
-    this._inputContext.drawImage(inputFrame, 0, 0, width, height);
-    const imageData = this._inputContext.getImageData(0, 0, width, height);
-    return imageData;
+  /**
+   * Loop function to render the background mask.
+   *
+   * @private
+   * @returns {void}
+   */
+  _renderMask() {
+    this.resizeSource();
+    this.runInference();
+    this.runPostProcessing();
+
+    this._maskFrameTimerWorker.postMessage({
+      id: SET_TIMEOUT,
+      // timeMs: 1000 / 30
+      timeMs: 30
+    });
+  }
+
+  /**
+   * Represents the resize source process.
+   *
+   * @returns {void}
+   */
+  resizeSource() {
+    if (this._segmentationMaskCtx) {
+      this._segmentationMaskCtx.drawImage(
+        this._inputVideoElement,
+        0,
+        0,
+        this._inputVideoElement.width,
+        this._inputVideoElement.height,
+        0,
+        0,
+        this._options.width,
+        this._options.height
+      );
+
+      const imageData = this._segmentationMaskCtx.getImageData(
+        0,
+        0,
+        this._options.width,
+        this._options.height
+      );
+      const inputMemoryOffset = this._tflite._getInputMemoryOffset() / 4;
+      const segmentationPixelCount = this._options.width * this._options.height;
+
+      for (let i = 0; i < segmentationPixelCount; i++) {
+        this._tflite.HEAPF32[inputMemoryOffset + (i * 3)] =
+          imageData.data[i * 4] / 255;
+        this._tflite.HEAPF32[inputMemoryOffset + (i * 3) + 1] =
+          imageData.data[(i * 4) + 1] / 255;
+        this._tflite.HEAPF32[inputMemoryOffset + (i * 3) + 2] =
+          imageData.data[(i * 4) + 2] / 255;
+      }
+    }
+  }
+
+  /**
+   * EventHandler onmessage for the maskFrameTimerWorker WebWorker.
+   *
+   * @private
+   * @param {EventHandler} response - The onmessage EventHandler parameter.
+   * @returns {void}
+   */
+  _onMaskFrameTimer(response: any) {
+    if (response.data.id === TIMEOUT_TICK) {
+      this._renderMask();
+    }
+  }
+
+  /**
+   * Starts loop to capture video frame and render the segmentation mask.
+   *
+   * @param {MediaStream} stream - Stream to be used for processing.
+   * @returns {MediaStream} - The stream with the applied effect.
+   */
+  startEffect(stream: MediaStream) {
+    console.log('[startEffect] Effect started', stream);
+    try {
+        this._maskFrameTimerWorker = new Worker(timerWorkerScript, {
+            name: 'BlurEffectWorker'
+          });
+          this._maskFrameTimerWorker.onmessage = this._onMaskFrameTimer.bind(this);
+          const videoTrack: MediaStreamTrack = stream.getVideoTracks()[0];
+          const { width, height, frameRate } = videoTrack.getSettings
+            ? videoTrack.getSettings()
+            : videoTrack.getConstraints();
+      
+          console.log('[startEffect] height :', height);
+          console.log('[startEffect] width :', width);
+      
+          this._outputCanvasElement.width = Number(width);
+          this._outputCanvasElement.height = Number(height);
+          this._outputCanvasCtx = this._outputCanvasElement.getContext('2d');
+          this._inputVideoElement.width = Number(width);
+          this._inputVideoElement.height = Number(height);
+          this._inputVideoElement.autoplay = true;
+          this._inputVideoElement.srcObject = stream;
+          this._inputVideoElement.onloadeddata = () => {
+            console.log('[_inputVideoElement.onloadeddata] done');
+            this._maskFrameTimerWorker.postMessage({
+              id: SET_TIMEOUT,
+              //          timeMs: 1000 / 30
+              timeMs: 30
+            });
+          };
+      
+          console.log(
+            '[startEffect] this._inputVideoElement.width :',
+            this._inputVideoElement.width
+          );
+          console.log(
+            '[startEffect] this._inputVideoElement.height :',
+            this._inputVideoElement.height
+          );
+          console.log(
+            '[startEffect] this._outputCanvasElement.width :',
+            this._outputCanvasElement.width
+          );
+          console.log(
+            '[startEffect] this._outputCanvasElement.height :',
+            this._outputCanvasElement.height
+          );
+          console.log(
+            '[startEffect] this._segmentationMaskCanvas.width :',
+            this._segmentationMaskCanvas.width
+          );
+          console.log(
+            '[startEffect] this._segmentationMaskCanvas.height :',
+            this._segmentationMaskCanvas.height
+          );
+      
+          return this._outputCanvasElement.captureStream(Number(frameRate));
+    } catch(err) {
+        console.error("[startEffect] Error:", err)
+    }
+    
   }
 
   private _createJSScript(url: string): Promise<void> {
@@ -317,7 +468,7 @@ export abstract class BackgroundEffect extends Effect {
     });
   }
 
-  private async _loadTfLite(): Promise<any> {
+  async _loadTfLite(): Promise<any> {
     let tflite: any;
     await this._createJSScript(this._assetsPath + TFLITE_SIMD_LOADER_NAME);
 
@@ -325,42 +476,11 @@ export abstract class BackgroundEffect extends Effect {
       tflite = await window.createTFLiteSIMDModule();
       this._isSimdEnabled = true;
     } catch {
-      console.warn('SIMD not supported. You may experience poor quality of background replacement.');
-      /* await this._createJSScript(this._assetsPath + TFLITE_LOADER_NAME);
-      tflite = await window.createTwilioTFLiteModule(); */
+      console.warn(
+        'SIMD not supported. You may experience poor quality of background replacement.'
+      );
       this._isSimdEnabled = false;
     }
     return tflite;
-  }
-
-  /* private async _runBodyPixInference(inputImage: ImageData): Promise<Uint8Array> {
-    const segment = await BackgroundEffect._model!.segmentPerson(inputImage, this._inferenceConfig);
-    return segment.data;
-  } */
-
-  /**
-   * This function takes an image as an input and apply tflite inference?
-   * @param inputImage 
-   * @returns 
-   */
-  private _runTFLiteInference(inputImage: ImageData): Uint8ClampedArray {
-    const { _inferenceDimensions: { width, height }, _inputMemoryOffset: offset, _tflite: tflite } = this;
-    const pixels = width * height;
-
-    for (let i = 0; i < pixels; i++) {
-      tflite.HEAPF32[offset + i * 3] = inputImage.data[i * 4] / 255;
-      tflite.HEAPF32[offset + i * 3 + 1] = inputImage.data[i * 4 + 1] / 255;
-      tflite.HEAPF32[offset + i * 3 + 2] = inputImage.data[i * 4 + 2] / 255;
-    }
-
-    tflite._runInference();
-    const inferenceData = new Uint8ClampedArray(pixels * 4);
-
-    for (let i = 0; i < pixels; i++) {
-      const personProbability = tflite.HEAPF32[this._outputMemoryOffset + i];
-      inferenceData[i] = Number(personProbability >= this._personProbabilityThreshold) * personProbability;
-    }
-
-    return inferenceData;
   }
 }
