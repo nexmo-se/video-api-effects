@@ -10,7 +10,7 @@
     "build": "tsc",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json -t stylish",
     "build-umd": "NODE_ENV=production webpack && npm run copy:library-to-sample-app",
-    "copy:js-assets": "cp -r ./assets/* ./dist/build/",
+    "copy:js-assets": "mkdir -p ./dist/build/ && cp -r ./assets/* ./dist/build/",
     "copy:library-to-sample-app": "mkdir -p ./sample-app/library && cp ./dist/umd/vonage-video-effects.js ./sample-app/library/vonage-video-effects.js",
     "watch": "npm run build:version && nodemon"
   },

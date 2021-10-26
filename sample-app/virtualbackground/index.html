@@ -10,20 +10,26 @@
     </head>
     <body>
       <div class="container-fluid">
-        <div id="publisher" class="row thin-gutters align">
-          
-        </div>
-      </div>
-      <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog" role="document" >
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <div id="video-container">
+            <h3>Local Publisher</h3>
+            <div id="publisher">
+              
             </div>
-            <div class="modal-body">
-              ...
+            <div>
+                <form id="backgrounds-form">
+                    <label for="backgroundImage">Background Image</label>
+                    <select class="form-control selectpicker" id="backgroundImage">
+                        <option value="vonage">Vonage</option>
+                        <option value="simpson">Simpson</option>
+                    </select>
+                </form>
+                
             </div>
-          </div>
+            <div id="buttons">
+                <button id="start-virtual-bg-effect">Start Virtual Background Effect</button>
+                <button id="start-blur-effect">Start Blur Effect</button>
+                <button id="stop-effect">Stop Effect</button>
+            </div>
         </div>
       </div>
     <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
