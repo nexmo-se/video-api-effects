@@ -36,8 +36,18 @@ You can also copy `vonage-video-effects.js` from the `dist/build` folder and inc
  
  ```ts
  const VideoEffects = Opentok.VideoEffect;
+ 
  ```
  
  
+### Build the library locally
+ 
+You can build the library locally following these steps:
+
+1. `npm install` 
+2. `npm run build-umd`
+3. `cd example` and `npm start`. The app server will start on port 3000
+
+
  
  

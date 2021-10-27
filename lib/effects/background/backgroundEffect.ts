@@ -89,10 +89,10 @@ export interface BackgroundEffectOptions {
 /**
  * @private
  */
-export class BackgroundEffect {
+export abstract class BackgroundEffect {
   private _tflite: any;
   private _options: any = {};
-  private static segmentationDimensions = MODEL_WASM_INFERENCE_DIMENSIONS
+  private static segmentationDimensions = MODEL_WASM_INFERENCE_DIMENSIONS;
   
   protected _inputVideoElement: HTMLVideoElement;
   protected _outputCanvasElement: HTMLCanvasElement;
@@ -141,6 +141,8 @@ export class BackgroundEffect {
     this._segmentationMaskCanvas.height = this._options.height;
     this._segmentationMaskCtx = this._segmentationMaskCanvas.getContext('2d');
   }
+
+  protected abstract _applyFilter(input: HTMLVideoElement): void;
 
   /**
    * The current blur radius when smoothing out the edges of the person's mask.
@@ -201,7 +203,9 @@ export class BackgroundEffect {
    */
   runPostProcessing() {
     if (this._outputCanvasCtx) {
+      // this._outputCanvasCtx.save();
       this._outputCanvasCtx.globalCompositeOperation = 'copy';
+      // Smooth out the edges.
       if (this._options.virtualBackground && this._options.virtualBackground.backgroundType === 'image') {
         this._outputCanvasCtx.filter = `blur(${this._maskBlurRadius}px)`;
       } else {
@@ -221,32 +225,27 @@ export class BackgroundEffect {
       );
       this._outputCanvasCtx.globalCompositeOperation = 'source-in';
       this._outputCanvasCtx.filter = 'none';
-
       // Draw the foreground video.
-      //
-
       this._outputCanvasCtx.drawImage(this._inputVideoElement, 0, 0);
-
-      // Draw the background.
-      //
-
       this._outputCanvasCtx.globalCompositeOperation = 'destination-over';
-      //      console.log('this._options.virtualBackground.backgroundType :', this._options.virtualBackground.backgroundType);
 
-      if (this._options.virtualBackground && this._options.virtualBackground.backgroundType === 'image') {
-        // todo for now only blur
-        /* this._outputCanvasCtx.drawImage(
-            this._virtualImage,
-            
-            0,
-            0,
-            this._inputVideoElement.width,
-            this._inputVideoElement.height
-          ); */
-      } else {
-        this._outputCanvasCtx.filter = `blur(${this._options.virtualBackground.blurValue}px)`;
-        this._outputCanvasCtx.drawImage(this._inputVideoElement, 0, 0);
-      }
+      this._applyFilter(this._inputVideoElement);
+      // restore the canvas
+      /* this._outputCanvasCtx.restore(); */
+
+
+
+    /* this._maskContext.putImageData(personMask, 0, 0);
+    this._outputContext.save();
+    this._outputContext.filter = `blur(${this._maskBlurRadius}px)`;
+    this._outputContext.globalCompositeOperation = 'copy';
+    this._outputContext.drawImage(this._maskCanvas, 0, 0, captureWidth, captureHeight);
+    this._outputContext.filter = 'none';
+    this._outputContext.globalCompositeOperation = 'source-in';
+    this._outputContext.drawImage(inputFrame, 0, 0, captureWidth, captureHeight);
+    this._outputContext.globalCompositeOperation = 'destination-over';
+    this._setBackground(inputFrame);
+    this._outputContext.restore(); */
     }
   }
 
