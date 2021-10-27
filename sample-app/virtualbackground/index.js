@@ -35,7 +35,9 @@ let virtualBgEffect;
 
 const loadImage = (name) => {
   return new Promise((resolve) => {
-    const image = new Image();
+    /* const image = new Image(); */
+    const image = document.createElement('img');
+    image.crossOrigin = 'anonymous';
     image.src = `backgrounds/${name}.jpg`;
     image.onload = () => resolve(image);
   });
@@ -111,7 +113,6 @@ const initVirtualBgEffect = async () => {
   const options = {};
   const inputs = backgroundsForm.elements;
   for (let item of inputs) {
-    console.log('item', item);
     item.valueAsNumber
       ? (options[item.id] = item.valueAsNumber)
       : (options[item.id] = item.value);
@@ -120,7 +121,10 @@ const initVirtualBgEffect = async () => {
   if (!virtualBgEffect) {
     virtualBgEffect = new VirtualBackgroundEffect({
       assetsPath: '',
-      backgroundImage
+      virtualBackground: {
+        backgroundType: 'image',
+        backgroundImage
+      }
     });
     await virtualBgEffect.loadModel();
   } else {

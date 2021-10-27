@@ -203,7 +203,9 @@ export abstract class BackgroundEffect {
    */
   runPostProcessing() {
     if (this._outputCanvasCtx) {
+      // this._outputCanvasCtx.save();
       this._outputCanvasCtx.globalCompositeOperation = 'copy';
+      // Smooth out the edges.
       if (this._options.virtualBackground && this._options.virtualBackground.backgroundType === 'image') {
         this._outputCanvasCtx.filter = `blur(${this._maskBlurRadius}px)`;
       } else {
@@ -223,9 +225,27 @@ export abstract class BackgroundEffect {
       );
       this._outputCanvasCtx.globalCompositeOperation = 'source-in';
       this._outputCanvasCtx.filter = 'none';
+      // Draw the foreground video.
       this._outputCanvasCtx.drawImage(this._inputVideoElement, 0, 0);
       this._outputCanvasCtx.globalCompositeOperation = 'destination-over';
+
       this._applyFilter(this._inputVideoElement);
+      // restore the canvas
+      /* this._outputCanvasCtx.restore(); */
+
+
+
+    /* this._maskContext.putImageData(personMask, 0, 0);
+    this._outputContext.save();
+    this._outputContext.filter = `blur(${this._maskBlurRadius}px)`;
+    this._outputContext.globalCompositeOperation = 'copy';
+    this._outputContext.drawImage(this._maskCanvas, 0, 0, captureWidth, captureHeight);
+    this._outputContext.filter = 'none';
+    this._outputContext.globalCompositeOperation = 'source-in';
+    this._outputContext.drawImage(inputFrame, 0, 0, captureWidth, captureHeight);
+    this._outputContext.globalCompositeOperation = 'destination-over';
+    this._setBackground(inputFrame);
+    this._outputContext.restore(); */
     }
   }
 

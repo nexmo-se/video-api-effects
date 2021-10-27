@@ -3,8 +3,12 @@ import { BLUR_FILTER_RADIUS } from '../../constants';
 import { ImageFit } from '../../types';
 
 export interface VirtualBackgroundEffectOptions extends BackgroundEffectOptions {
-  
-   backgroundImage: HTMLImageElement;
+    
+    virtualBackground: {
+        backgroundImage: HTMLImageElement;
+        backgroundType:string;
+    }
+   
    fitType?: ImageFit;
 }
 
@@ -20,8 +24,8 @@ export class VirtualBackgroundEffect extends BackgroundEffect {
      */
     constructor(options: VirtualBackgroundEffectOptions) {
       super(options);
-      this.backgroundImage = options.backgroundImage;
-      this.fitType = options.fitType!;
+      this.backgroundImage = options.virtualBackground.backgroundImage;
+      this.fitType = options.fitType || ImageFit.Fill;
     }
   
     /**
@@ -63,13 +67,17 @@ export class VirtualBackgroundEffect extends BackgroundEffect {
       this._fitType = fitType;
     }
   
-    protected _applyFilter(): void {
+    protected _applyFilter(input: HTMLVideoElement): void {  
       const img = this._backgroundImage;
       const imageWidth = img.naturalWidth;
       const imageHeight = img.naturalHeight;
       const canvasWidth = this._outputCanvasElement.width;
       const canvasHeight = this._outputCanvasElement.height;
-      if (this._outputCanvasCtx) {
+      console.log("img width", img.naturalWidth);
+      console.log("img height", img.naturalHeight);
+      console.log("canvas - w", this._outputCanvasElement.width);
+      console.log("canvas- h", this._outputCanvasElement.height);
+      if (this._outputCanvasCtx) { 
         if (this._fitType === ImageFit.Fill) {
             this._outputCanvasCtx.drawImage(img, 0, 0, imageWidth, imageHeight, 0, 0, canvasWidth, canvasHeight);
           } else if (this._fitType === ImageFit.None) {
