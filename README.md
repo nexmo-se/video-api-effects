@@ -50,4 +50,69 @@ You can build the library locally following these steps:
 
 
  
+### Background Effect
  
+The library adds effects on a MediaStream object. The developer needs to create the MediaStream and pass it to the library. Example:
+
+```js
+import OT from "@opentok/client"
+
+let mediaTrack;
+let backgroundBlur;
+
+// Create the MediaTrack with OT.getUserMedia
+
+OT.getUserMedia({ audio: true, video: true })
+	.then((track) => {
+	  mediaTrack = track;
+	})
+	.catch((err) => {
+	  console.error('OTGetUserMedia - err', err);
+	});
+	
+// Initiate the blur effect
+	
+backgroundBlur = new BackgroundBlurEffect({
+	assetsPath: 'https://your-server-url.com/assets'
+});
+await backgroundBlur.loadModel();
+let outputVideoStream = backgroundBlur.startEffect(mediaTrack);
+
+// Create the publisher and publish into the session
+
+let publisher = OT.initPublisher(
+    'publisher',
+    {
+      audioSource: mediaTrack.getAudioTracks()[0],
+      videoSource: outputVideoStream.getVideoTracks()[0],
+      width: 640,
+      height: 480,
+      insertMode: 'append'
+    },
+    (err) => {
+      console.log('Publisher Created');
+    }
+  );
+  session = OT.initSession(apikey, sessionId);
+  session.on('streamCreated', (stream) => {
+    session.subscribe(stream, (err) => {
+      if (err) {
+        console.log('Error while subscribing', stream);
+      }
+      console.log('Subscribed to ', stream);
+    });
+  });
+  session.connect(token, (err) => {
+    if (err) {
+      console.log('Error while connecting to the session');
+    }
+    console.log('Session Connected');
+    session.publish(publisher, (errPublisher) => {
+      if (errPublisher) {
+        console.log('Error while publishing into the session');
+      }
+      console.log('Successfully published the stream');
+    });
+  });
+
+```
