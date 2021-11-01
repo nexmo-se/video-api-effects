@@ -1,5 +1,6 @@
 import { BackgroundEffect, BackgroundEffectOptions } from './BackgroundEffect';
 import { BLUR_FILTER_RADIUS } from '../../constants';
+import log from 'loglevel';
 
 export interface BackgroundBlurEffectOptions extends BackgroundEffectOptions {
   
@@ -21,7 +22,7 @@ export class BackgroundBlurEffect extends BackgroundEffect {
 
   set blurFilterRadius(radius: number) {
     if (!radius) {
-      console.warn(
+      log.warn(
         `Valid blur filter radius not found. Using ${BLUR_FILTER_RADIUS} as default.`
       );
       radius = BLUR_FILTER_RADIUS;

@@ -1,15 +1,20 @@
 {
   "name": "@vonage/video-effects",
-  "version": "0.1.0",
+  "version": "0.1.0-rc1",
   "description": "Library to add video effects",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json -t stylish",
-    "build-umd": "NODE_ENV=production webpack && npm run copy:library-to-sample-app",
+    "build-umd-prod": "NODE_ENV=production webpack",
+    "build-umd": "webpack && npm run copy:library-to-sample-app",
     "copy:js-assets": "mkdir -p ./dist/build/ && cp -r ./assets/* ./dist/build/",
     "copy:library-to-sample-app": "mkdir -p ./sample-app/library && cp ./dist/umd/vonage-video-effects.js ./sample-app/library/vonage-video-effects.js",
+    "prepare": "npm run build && npm run build-umd-prod",
     "watch": "npm run build:version && nodemon"
+  },
+  "engines": {
+    "node": ">=14"
   },
   "author": "Enrico Portolan",
   "license": "ISC",
@@ -17,7 +22,8 @@
   "dependencies": {
     "@tensorflow/tfjs-backend-cpu": "^3.3.0",
     "@tensorflow/tfjs-backend-webgl": "^3.2.0",
-    "@tensorflow/tfjs-core": "^3.9.0"
+    "@tensorflow/tfjs-core": "^3.9.0",
+    "loglevel": "^1.7.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.13",

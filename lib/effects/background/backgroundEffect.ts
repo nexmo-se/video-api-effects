@@ -1,5 +1,6 @@
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-cpu';
+import log from 'loglevel';
 /* import { ModelConfig, PersonInferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'; */
 import { Dimensions } from '../../types';
 import {
@@ -155,7 +156,7 @@ export abstract class BackgroundEffect {
    */
   set maskBlurRadius(radius: number) {
     if (typeof radius !== 'number' || radius < 0) {
-      console.warn(
+      log.warn(
         `Valid mask blur radius not found. Using ${MASK_BLUR_RADIUS} as default.`
       );
       radius = MASK_BLUR_RADIUS;
@@ -175,7 +176,7 @@ export abstract class BackgroundEffect {
       fetch(this._assetsPath + modelToLoad)
     ]);
 
-    console.log("ModelResponse", modelResponse)
+    log.debug("ModelResponse", modelResponse)
 
     const model = await modelResponse.arrayBuffer();
     const modelBufferOffset = tflite._getModelBufferMemoryOffset();
@@ -351,10 +352,10 @@ export abstract class BackgroundEffect {
    * @returns {MediaStream} - The stream with the applied effect.
    */
   startEffect(stream: MediaStream) {
-    console.log('[startEffect] Effect started', stream);
+    log.debug('[startEffect] Effect started', stream);
     try {
         if (!stream) {
-            console.warn('[startEffect] - Media Stream is null');
+            log.warn('[startEffect] - Media Stream is null');
             return;
         }
         this._maskFrameTimerWorker = new Worker(timerWorkerScript, {
@@ -366,8 +367,8 @@ export abstract class BackgroundEffect {
             ? videoTrack.getSettings()
             : videoTrack.getConstraints();
       
-          console.log('[startEffect] height :', height);
-          console.log('[startEffect] width :', width);
+          log.debug('[startEffect] height :', height);
+          log.debug('[startEffect] width :', width);
       
           this._outputCanvasElement.width = Number(width);
           this._outputCanvasElement.height = Number(height);
@@ -377,7 +378,7 @@ export abstract class BackgroundEffect {
           this._inputVideoElement.autoplay = true;
           this._inputVideoElement.srcObject = stream;
           this._inputVideoElement.onloadeddata = () => {
-            console.log('[_inputVideoElement.onloadeddata] done');
+            log.debug('[_inputVideoElement.onloadeddata] done');
             this._maskFrameTimerWorker.postMessage({
               id: SET_TIMEOUT,
               //          timeMs: 1000 / 30
@@ -385,27 +386,27 @@ export abstract class BackgroundEffect {
             });
           };
       
-          console.log(
+          log.debug(
             '[startEffect] this._inputVideoElement.width :',
             this._inputVideoElement.width
           );
-          console.log(
+          log.debug(
             '[startEffect] this._inputVideoElement.height :',
             this._inputVideoElement.height
           );
-          console.log(
+          log.debug(
             '[startEffect] this._outputCanvasElement.width :',
             this._outputCanvasElement.width
           );
-          console.log(
+          log.debug(
             '[startEffect] this._outputCanvasElement.height :',
             this._outputCanvasElement.height
           );
-          console.log(
+          log.debug(
             '[startEffect] this._segmentationMaskCanvas.width :',
             this._segmentationMaskCanvas.width
           );
-          console.log(
+          log.debug(
             '[startEffect] this._segmentationMaskCanvas.height :',
             this._segmentationMaskCanvas.height
           );
@@ -443,7 +444,7 @@ export abstract class BackgroundEffect {
       tflite = await window.createTFLiteSIMDModule();
       this._isSimdEnabled = true;
     } catch {
-      console.warn(
+      log.warn(
         'SIMD not supported. You may experience poor quality of background replacement.'
       );
       this._isSimdEnabled = false;
