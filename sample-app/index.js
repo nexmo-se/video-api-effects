@@ -85,8 +85,8 @@ const publishToSession = (outputVideoStream) => {
     }
   );
   session = OT.initSession(apikey, sessionId);
-  session.on('streamCreated', (stream) => {
-    session.subscribe(stream, (err) => {
+  session.on('streamCreated', (event) => {
+    session.subscribe(event.stream, (err) => {
       if (err) {
         console.log('Error while subscribing', stream);
       }

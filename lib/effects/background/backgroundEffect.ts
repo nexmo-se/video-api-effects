@@ -115,7 +115,6 @@ export abstract class BackgroundEffect {
         ...options,
         ...this._isSimdEnabled ? BackgroundEffect.segmentationDimensions.model144 : BackgroundEffect.segmentationDimensions.model96,
     }
-    console.log("BackgroundEffect Options", this._options)
     if (typeof options.assetsPath !== 'string') {
       throw new Error('assetsPath parameter is missing');
     }
@@ -354,6 +353,10 @@ export abstract class BackgroundEffect {
   startEffect(stream: MediaStream) {
     console.log('[startEffect] Effect started', stream);
     try {
+        if (!stream) {
+            console.warn('[startEffect] - Media Stream is null');
+            return;
+        }
         this._maskFrameTimerWorker = new Worker(timerWorkerScript, {
             name: 'BlurEffectWorker'
           });

@@ -2,10 +2,7 @@
   "name": "@vonage/video-effects",
   "version": "0.1.0",
   "description": "Library to add video effects",
-  "main": "lib/index.ts",
-  "directories": {
-    "lib": "lib"
-  },
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json -t stylish",
@@ -16,7 +13,7 @@
   },
   "author": "Enrico Portolan",
   "license": "ISC",
-  "types": "./es5/index.d.ts",
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@tensorflow/tfjs-backend-cpu": "^3.3.0",
     "@tensorflow/tfjs-backend-webgl": "^3.2.0",

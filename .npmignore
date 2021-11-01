@@ -19,7 +19,7 @@ npm-debug.log
 node_modules
 scripts
 tests
+lib/**/*
 sample-app
-lib
 tsconfig.json
 tslint.json

@@ -7,11 +7,11 @@ export const MASK_BLUR_RADIUS = 5;
 export const HISTORY_COUNT = 5;
 export const PERSON_PROBABILITY_THRESHOLD = 0.4;
 export const MODEL_NAME = 'selfie_segmentation_landscape.tflite';
-export const TFLITE_LOADER_NAME = 'tflite/tflite.js';
-export const TFLITE_SIMD_LOADER_NAME = 'tflite/tflite-simd.js';
+export const TFLITE_LOADER_NAME = 'tflite.js';
+export const TFLITE_SIMD_LOADER_NAME = 'tflite-simd.js';
 export const TFLITE_MODELS_SEG_LITE = {
-    model96: 'models/segm_lite_v681.tflite',
-    model144: 'models/segm_full_v679.tflite'
+    model96: 'segm_lite_v681.tflite',
+    model144: 'segm_full_v679.tflite'
   };
 
 /* export const MODEL_CONFIG: ModelConfig = {
