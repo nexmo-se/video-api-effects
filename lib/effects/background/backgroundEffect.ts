@@ -1,7 +1,6 @@
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-cpu';
 import log from 'loglevel';
-/* import { ModelConfig, PersonInferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'; */
 import { Dimensions } from '../../types';
 import {
   CLEAR_TIMEOUT,
@@ -22,50 +21,10 @@ import {
  */
 export interface BackgroundEffectOptions {
   /**
-   * The BackgroundEffect load assets dynamically depending on certain browser features.
-   * You need to serve all the assets and provide the root path so they can be referenced properly.
-   * These assets can be copied from the `dist/build` folder which you can add as part of your deployment process.
-   * @example
-   * <br/>
-   * <br/>
-   * For virtual background:
-   * <br/>
-   *
-   * ```ts
-   * const virtualBackground = new BackgroundEffect({
-   *   assetsPath: 'https://my-server-path/assets',
-   *   backgroundImage: img,
-   * });
-   * await virtualBackground.loadModel();
-   * ```
-   *
-   * <br/>
-   * For blur background:
-   * <br/>
-   *
-   * ```ts
-   * const blurBackground = new BackgroundEffect({
-   *   assetsPath: 'https://my-server-path/assets'
-   * });
-   * await blurBackground.loadModel();
-   * ```
+   * The assets path where the models and tflite are loaded.
+   * These assets can be copied from the `dist/build` folder.
    */
   assetsPath: string;
-
-  /**
-   * @private
-   */
-  debounce?: number;
-
-  /**
-   * @private
-   */
-  /* inferenceConfig?: PersonInferenceConfig; */
-
-  /**
-   * @private
-   */
-  inferenceDimensions?: Dimensions;
 
   /**
    * The blur radius to use when smoothing out the edges of the person's mask.
@@ -75,11 +34,6 @@ export interface BackgroundEffectOptions {
    * ```
    */
   maskBlurRadius?: number;
-
-  /**
-   * @private
-   */
-  personProbabilityThreshold?: number;
 
   /**
    * @private
@@ -107,7 +61,6 @@ export abstract class BackgroundEffect {
   private _segmentationMaskCanvas: HTMLCanvasElement;
   private _segmentationMaskCtx: CanvasRenderingContext2D | null;
   // tslint:disable-next-line no-unused-variable
-  /* private readonly _version: string = version; */
 
   private _maskFrameTimerWorker: any;
 
