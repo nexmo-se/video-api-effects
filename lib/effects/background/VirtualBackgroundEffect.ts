@@ -1,6 +1,7 @@
 import { BackgroundEffect, BackgroundEffectOptions } from './BackgroundEffect';
 import { BLUR_FILTER_RADIUS } from '../../constants';
 import { ImageFit } from '../../types';
+import log from 'loglevel';
 
 export interface VirtualBackgroundEffectOptions extends BackgroundEffectOptions {
     
@@ -61,7 +62,7 @@ export class VirtualBackgroundEffect extends BackgroundEffect {
     set fitType(fitType: ImageFit) {
       const validTypes = Object.keys(ImageFit);
       if (!validTypes.includes(fitType as any)) {
-        console.warn(`Valid fitType not found. Using '${ImageFit.Fill}' as default.`);
+        log.warn(`Valid fitType not found. Using '${ImageFit.Fill}' as default.`);
         fitType = ImageFit.Fill;
       }
       this._fitType = fitType;
@@ -73,10 +74,10 @@ export class VirtualBackgroundEffect extends BackgroundEffect {
       const imageHeight = img.naturalHeight;
       const canvasWidth = this._outputCanvasElement.width;
       const canvasHeight = this._outputCanvasElement.height;
-      console.log("img width", img.naturalWidth);
-      console.log("img height", img.naturalHeight);
-      console.log("canvas - w", this._outputCanvasElement.width);
-      console.log("canvas- h", this._outputCanvasElement.height);
+      log.debug("img width", img.naturalWidth);
+      log.debug("img height", img.naturalHeight);
+      log.debug("canvas - w", this._outputCanvasElement.width);
+      log.debug("canvas- h", this._outputCanvasElement.height);
       if (this._outputCanvasCtx) { 
         if (this._fitType === ImageFit.Fill) {
             this._outputCanvasCtx.drawImage(img, 0, 0, imageWidth, imageHeight, 0, 0, canvasWidth, canvasHeight);

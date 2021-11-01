@@ -1,8 +1,14 @@
+import log from 'loglevel';
+
 import { BackgroundBlurEffect, BackgroundBlurEffectOptions } from './effects/background/BackgroundBlurEffect';
 import { VirtualBackgroundEffect, VirtualBackgroundEffectOptions } from './effects/background/VirtualBackgroundEffect';
 import { isSupported } from './utils';
 
 window.OT = window.OT || {};
+
+if (process.env.ENV === 'production') {
+    log.setLevel('WARN');
+}
 
 window.OT.VideoEffects = {
     isSupported,
@@ -15,8 +21,6 @@ const OTVideoEffects = {
     BackgroundBlurEffect, 
     VirtualBackgroundEffect
 }
-
-
 
 export {
   OTVideoEffects,
