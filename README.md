@@ -18,7 +18,7 @@ You can install directly from npm.
 npm install @opentok/video-effects --save
 ```
 
-Using this method, you can import `twilio-video-processors` like so:
+Using this method, you can import `vonage-video-effects` like so:
 
 ```ts
 import * as VideoEffects from '@vonage/video-effects';

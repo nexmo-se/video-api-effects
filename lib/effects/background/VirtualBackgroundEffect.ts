@@ -18,8 +18,8 @@ export class VirtualBackgroundEffect extends BackgroundEffect {
     // tslint:disable-next-line no-unused-variable
   
     /**
-     * Construct a VirtualBackgroundProcessor. Default values will be used for
-     * any missing optional properties in [[VirtualBackgroundProcessorOptions]],
+     * Construct a VirtualBackgroundEffect. Default values will be used for
+     * any missing optional properties in [[VirtualBackgroundEffectOptions]],
      * and invalid properties will be ignored.
      */
     constructor(options: VirtualBackgroundEffectOptions) {
