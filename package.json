@@ -10,14 +10,15 @@
     "build-umd": "webpack && npm run copy:library-to-sample-app",
     "copy:js-assets": "mkdir -p ./dist/build/ && cp -r ./assets/* ./dist/build/",
     "copy:library-to-sample-app": "mkdir -p ./sample-app/library && cp ./dist/umd/vonage-video-effects.js ./sample-app/library/vonage-video-effects.js",
-    "prepare": "npm run build && npm run build-umd-prod",
+    "clean": "rimraf dist",
+    "prepare": "npm run clean && npm run build && npm run build-umd-prod",
     "watch": "npm run build:version && nodemon"
   },
   "engines": {
     "node": ">=14"
   },
   "author": "Enrico Portolan",
-  "license": "ISC",
+  "license": "MIT",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@tensorflow/tfjs-backend-cpu": "^3.3.0",
@@ -27,10 +28,12 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.13",
+    "rimraf": "^3.0.2",
     "ts-loader": "^9.0.0",
     "ts-node": "^10.3.0",
     "tsdx": "^0.14.1",
     "tsify": "^5.0.4",
+    "tslint": "^6.1.3",
     "typescript": "^4.4.4",
     "webpack": "^5.33.2",
     "webpack-cli": "^4.7.2"

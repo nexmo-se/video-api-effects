@@ -56,6 +56,7 @@ export abstract class BackgroundEffect {
   private _assetsPath: string;
   // tslint:disable-next-line no-unused-variable
   private _isSimdEnabled: boolean | null = null;
+  private _useWasm: boolean;
   private _maskBlurRadius: number = MASK_BLUR_RADIUS;
   private _segmentationMask: ImageData;
   private _segmentationMaskCanvas: HTMLCanvasElement;
@@ -65,9 +66,10 @@ export abstract class BackgroundEffect {
   private _maskFrameTimerWorker: any;
 
   constructor(options: BackgroundEffectOptions) {
+    this._useWasm = typeof options.useWasm === 'boolean' ? options.useWasm : true;
     this._options = {
         ...options,
-        ...this._isSimdEnabled ? BackgroundEffect.segmentationDimensions.model144 : BackgroundEffect.segmentationDimensions.model96,
+        ...this._useWasm ? BackgroundEffect.segmentationDimensions.model144 : BackgroundEffect.segmentationDimensions.model96,
     }
     if (typeof options.assetsPath !== 'string') {
       throw new Error('assetsPath parameter is missing');
@@ -123,7 +125,7 @@ export abstract class BackgroundEffect {
    * video frames are processed correctly.
    */
   async loadModel() {
-    const modelToLoad =  this._isSimdEnabled? TFLITE_MODELS_SEG_LITE.model144 : TFLITE_MODELS_SEG_LITE.model96 
+    const modelToLoad =  this._useWasm? TFLITE_MODELS_SEG_LITE.model144 : TFLITE_MODELS_SEG_LITE.model96 
     const [tflite, modelResponse] = await Promise.all([
       this._loadTfLite(),
       fetch(this._assetsPath + modelToLoad)
@@ -137,16 +139,6 @@ export abstract class BackgroundEffect {
     tflite._loadModel(model.byteLength);
 
     this._tflite = tflite;
-  }
-
-  // todo  NEW METHODS ============
-
-  /**
-   * loadModel and initialize tflite.
-   * @param virtualBackground
-   */
-  async createVirtualBackgroundEffect(virtualBackground: any): Promise<any> {
-    // return new BackgroundEffect(tflite, options);
   }
 
   /**
@@ -183,22 +175,6 @@ export abstract class BackgroundEffect {
       this._outputCanvasCtx.globalCompositeOperation = 'destination-over';
 
       this._applyFilter(this._inputVideoElement);
-      // restore the canvas
-      /* this._outputCanvasCtx.restore(); */
-
-
-
-    /* this._maskContext.putImageData(personMask, 0, 0);
-    this._outputContext.save();
-    this._outputContext.filter = `blur(${this._maskBlurRadius}px)`;
-    this._outputContext.globalCompositeOperation = 'copy';
-    this._outputContext.drawImage(this._maskCanvas, 0, 0, captureWidth, captureHeight);
-    this._outputContext.filter = 'none';
-    this._outputContext.globalCompositeOperation = 'source-in';
-    this._outputContext.drawImage(inputFrame, 0, 0, captureWidth, captureHeight);
-    this._outputContext.globalCompositeOperation = 'destination-over';
-    this._setBackground(inputFrame);
-    this._outputContext.restore(); */
     }
   }
 

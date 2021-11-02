@@ -6,7 +6,7 @@ The main feature is the background blur applied to the person's background.
 
 ## Prerequisites
 
-* [Vonage Video API SDK](https://www.npmjs.com/package/@opentok/client
+* [Vonage Video API SDK](https://www.npmjs.com/package/@opentok/client)
 
 ## Installation
 
@@ -15,7 +15,7 @@ The main feature is the background blur applied to the person's background.
 You can install directly from npm.
 
 ```
-npm install @opentok/video-effects --save
+npm install @vonage/video-effects --save
 ```
 
 Using this method, you can import `vonage-video-effects` like so:
@@ -35,7 +35,7 @@ You can also copy `vonage-video-effects.js` from the `dist/build` folder and inc
  Using this method, `vonage-video-effects.js` will set a browser global:
  
  ```ts
- const VideoEffects = Opentok.VideoEffect;
+ const VideoEffects = OT.VideoEffect;
  
  ```
  
@@ -56,6 +56,10 @@ The library adds effects on a MediaStream object. The developer needs to create 
 
 ```js
 import OT from "@opentok/client"
+const {
+  isSupported,
+  BackgroundBlurEffect,
+} = OT.VideoEffects;
 
 let mediaTrack;
 let backgroundBlur;
