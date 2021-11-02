@@ -66,7 +66,7 @@ let backgroundBlur;
 
 // Create the MediaTrack with OT.getUserMedia
 
-OT.getUserMedia({ audio: true, video: true })
+OT.getUserMedia({ audioSource: null, videoSource: true })
 	.then((track) => {
 	  mediaTrack = track;
 	})
@@ -87,7 +87,6 @@ let outputVideoStream = backgroundBlur.startEffect(mediaTrack);
 let publisher = OT.initPublisher(
     'publisher',
     {
-      audioSource: mediaTrack.getAudioTracks()[0],
       videoSource: outputVideoStream.getVideoTracks()[0],
       width: 640,
       height: 480,
