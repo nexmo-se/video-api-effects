@@ -131,7 +131,12 @@ export abstract class BackgroundEffect {
       fetch(this._assetsPath + modelToLoad)
     ]);
 
-    log.debug("ModelResponse", modelResponse)
+    log.debug("ModelResponse", modelResponse);
+
+    if (!tflite) {
+        log.error('[BackgroundEffect] - Tflite module not supported or available');
+        throw new Error('[BackgroundEffect] - Tflite module not supported or available')
+    }
 
     const model = await modelResponse.arrayBuffer();
     const modelBufferOffset = tflite._getModelBufferMemoryOffset();
