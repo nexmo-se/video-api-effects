@@ -15,7 +15,7 @@ The main feature is the background blur applied to the person's background.
 You can install directly from npm.
 
 ```
-npm install @vonage/video-effects --save
+npm install @vonage/video-effects
 ```
 
 Using this method, you can import `vonage-video-effects` like so:
@@ -48,18 +48,44 @@ You can build the library locally following these steps:
 2. `npm run build-umd`
 3. `cd example` and `npm start`. The app server will start on port 3000
 
+### Assets
+
+The VideoEffect library uses WebAssembly to run TensorFlow Lite for person segmentation. You need to serve the tflite model and binaries so they can be loaded properly. These files can be downloaded from the dist/build folder.
+
+These effects run TensorFlow Lite using MediaPipe Selfie Segmentation Landscape Model and requires Chrome's WebAssembly SIMD support in order to achieve the best performance. WebAssembly SIMD can be turned on by visiting chrome://flags on versions 84 through 90. This will be enabled by default on Chrome 91+.
 
  
-### Background Effect
+### Background Blur Effect
+
+The BackgroundBlurEffect applies a blur filter on the background in each video frame and leaves the person untouched. The constructor has the following options:
+
+| Option      | Type | Required | Description
+| ----------- | ----------- | --- | ----------- |
+| assetsPath  | String       | Yes | The path where the assets are loaded. These files can be downloaded from the dist/build folder. |
+| maskBlurRadius   | Number| No | The blur radius to use when smoothing out the edges of the person's mask (default 5)
+| blurFilterRadius   | Number| No | The background blur filter radius to use in pixels. (default 15)
+
+Example: 
+
+```js
+const backgroundBlur = new BackgroundBlurEffect({
+	assetsPath: 'https://your-server-url.com/assets',
+	maskBlurRadius: 5,
+	blurFilterRadius: 15
+});
+await backgroundBlur.loadModel();
+backgroundBlur.startEffect(mediaTrack);
+
+```
  
 The library adds effects on a MediaStream object. The developer needs to create the MediaStream and pass it to the library. Example:
 
 ```js
 import OT from "@opentok/client"
-const {
+import {
   isSupported,
   BackgroundBlurEffect,
-} = OT.VideoEffects;
+} from "@vonage/video-effects";
 
 let mediaTrack;
 let backgroundBlur;

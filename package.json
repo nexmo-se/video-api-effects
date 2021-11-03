@@ -3,6 +3,9 @@
   "version": "0.1.0-rc1.0",
   "description": "Library to add video effects",
   "main": "dist/index.js",
+  "repository": {
+      "url": "https://github.com/nexmo-se/video-api-effects"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json -t stylish",
