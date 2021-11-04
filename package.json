@@ -1,10 +1,10 @@
 {
   "name": "@vonage/video-effects",
-  "version": "0.1.0-rc1.0",
+  "version": "0.1.0-rc2.0",
   "description": "Library to add video effects",
   "main": "dist/index.js",
   "repository": {
-      "url": "https://github.com/nexmo-se/video-api-effects"
+    "url": "https://github.com/nexmo-se/video-api-effects"
   },
   "scripts": {
     "build": "tsc",
