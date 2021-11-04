@@ -93,27 +93,30 @@ import {
 
 let mediaTrack;
 let backgroundBlur;
+let outputVideoStream;
 
 // Create the MediaTrack with OT.getUserMedia
 
-OT.getUserMedia({ audioSource: null, videoSource: true })
-	.then((track) => {
+async function getLocalTrack() {
+	try {
+	  const track = await OT.getUserMedia({ audioSource: null, videoSource: true });
 	  mediaTrack = track;
-	})
-	.catch((err) => {
+	} catch (err) {
 	  console.error('OTGetUserMedia - err', err);
+	}
+}
+
+async function initBlurEffect() {
+	// Initiate the blur effect
+	backgroundBlur = new BackgroundBlurEffect({
+		assetsPath: 'https://your-server-url.com/assets'
 	});
+	await backgroundBlur.loadModel();
+	outputVideoStream = backgroundBlur.startEffect(mediaTrack);
+}
 	
-// Initiate the blur effect
-	
-backgroundBlur = new BackgroundBlurEffect({
-	assetsPath: 'https://your-server-url.com/assets'
-});
-await backgroundBlur.loadModel();
-let outputVideoStream = backgroundBlur.startEffect(mediaTrack);
-
+async function publishToSession() {
 // Create the publisher and publish into the session
-
 let publisher = OT.initPublisher(
     'publisher',
     {
@@ -147,5 +150,23 @@ let publisher = OT.initPublisher(
       console.log('Successfully published the stream');
     });
   });
+}
+
+async function stopEffect() {
+	if (backgroundBlur){
+        backgroundBlur.stopEffect();
+        mediaTrack.getTracks().forEach((t) => t.stop());
+        publisher.destroy()
+    }
+}
+
+async function init() {
+	await getLocalTrack();
+	await initBlurEffect();
+	await publishToSession();
+}
+
+  
+  
 
 ```
