@@ -1,6 +1,6 @@
 {
   "name": "@vonage/video-effects",
-  "version": "0.1.0-rc2.0",
+  "version": "0.1.0",
   "description": "Library to add video effects",
   "main": "dist/index.js",
   "repository": {
@@ -15,6 +15,7 @@
     "copy:library-to-sample-app": "mkdir -p ./sample-app/library && cp ./dist/umd/vonage-video-effects.js ./sample-app/library/vonage-video-effects.js",
     "clean": "rimraf dist",
     "prepare": "npm run clean && npm run build && npm run build-umd-prod",
+    "prelease":"npm version prerelease --preid=rc2",
     "watch": "npm run build:version && nodemon"
   },
   "engines": {

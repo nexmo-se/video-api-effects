@@ -2,7 +2,11 @@
 
 The Vonage Video Effect library adds effects to a camera video stream that you can use with [Vonage Video API](https://www.npmjs.com/package/@opentok/client).
 
-The main feature is the background blur applied to the person's background. 
+The main feature is the background blur applied to the person's background
+
+## Live Example
+
+You can see a working example: [https://vonage-video-effect-sample-app.herokuapp.com/](https://vonage-video-effect-sample-app.herokuapp.com/) 
 
 ## Prerequisites
 
