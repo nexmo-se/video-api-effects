@@ -28,7 +28,6 @@ const assetsPath = '';
 let session = null;
 let publisher = null;
 let backgroundBlur;
-let audioTrack;
 let videoTrack;
 let mediaTrack;
 let virtualBgEffect;
@@ -59,10 +58,9 @@ if (!isSupported) {
 }
 
 const createLocalTrack = () => {
-  return OT.getUserMedia({ audio: true, video: true })
+  return OT.getUserMedia({ audio: false, video: true })
     .then((track) => {
       mediaTrack = track;
-      audioTrack = track.getAudioTracks()[0];
       console.log('OTGetUserMedia - videoTrack', videoTrack);
     })
     .catch((err) => {
@@ -74,7 +72,6 @@ const publishToSession = (outputVideoStream) => {
   publisher = OT.initPublisher(
     'publisher',
     {
-      audioSource: audioTrack,
       videoSource: outputVideoStream.getVideoTracks()[0],
       width: 640,
       height: 480,
