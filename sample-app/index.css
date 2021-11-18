@@ -10,16 +10,28 @@ body {
 
 div.container-fluid {
   height: 100%;
+  display: flex;
 }
 
 #video-container {
+
+    height: 100vh;
+}
+
+.container-column {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    flex: 1;
+     flex-basis: 100%;
 }
 
 #publisher{
     flex: 0.7;
+}
+
+.backgrounds-form {
+    width: 400px;
+    padding: 20px;
 }
 
 
