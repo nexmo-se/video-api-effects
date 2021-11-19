@@ -25,7 +25,7 @@ export class VirtualBackgroundEffect extends BackgroundEffect {
      */
     constructor(options: VirtualBackgroundEffectOptions) {
       super(options);
-      this.backgroundImage = options.virtualBackground.backgroundImage;
+      this.backgroundImage = options.virtualBackground?.backgroundImage;
       this.fitType = options.fitType || ImageFit.Fill;
     }
   

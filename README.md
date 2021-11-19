@@ -166,7 +166,17 @@ async function init() {
 	await publishToSession();
 }
 
-  
-  
-
 ```
+
+### Virtual Background Effect
+
+The Virtual Background Effect applies a virtual background in each video frame and leaves the person untouched. The constructor has the following options:
+
+| Option      | Type | Required | Description
+| ----------- | ----------- | --- | ----------- |
+| assetsPath  | String       | Yes | The path where the assets are loaded. These files can be downloaded from the dist/build folder. |
+| virtualBackground.backgroundType   | String | Yes | Type of virtual background. The only supported type is "image". 
+| virtualBackground.backgroundImage   | HTMLImageElement | Yes | The HTMLImageElement representing the current background image.
+| maskBlurRadius   | Number| No | The blur radius to use when smoothing out the edges of the person's mask (default 5)
+| fitType   | Number| No | The ImageFit for positioning of the background image in the viewport. Available options: "Contain", "Cover", "Fill" or "None"
+
