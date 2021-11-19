@@ -58,7 +58,7 @@ if (!isSupported) {
 }
 
 const createLocalTrack = () => {
-  return OT.getUserMedia({ audio: false, video: true })
+  return OT.getUserMedia({ audioSource: null, videoSource: true })
     .then((track) => {
       mediaTrack = track;
       console.log('OTGetUserMedia - videoTrack', videoTrack);
