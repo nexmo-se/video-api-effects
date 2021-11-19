@@ -10,30 +10,35 @@
     </head>
     <body>
       <div class="container-fluid">
-        <div id="video-container">
+        <div id="video-container" class="container-column">
             <h3>Local Publisher</h3>
             <div id="publisher">
               
             </div>
-            <div>
-                <form id="backgrounds-form" style="display: none;">
-                    <label for="backgroundImage">Background Image</label>
+        </div>
+        <div class="container-column">
+            <h4>Choose Background Image</h4>
+            <div class="backgrounds-form">
+                <form id="backgrounds-form">
                     <select class="form-control selectpicker" id="backgroundImage">
                         <option value="vonage">Vonage</option>
                         <option value="simpson">Simpson</option>
                     </select>
                 </form>
-                
+                <button id="start-virtual-bg-effect" style="margin-top:5px">Start Virtual Background Effect</button>
             </div>
-            <div id="buttons">
-                <button id="start-virtual-bg-effect" style="display: none;">Start Virtual Background Effect</button>
-                <button id="start-blur-effect">Start Blur Effect</button>
+            <div>
+                <h4>Start Blur Effect</h4>
+                <button id="start-blur-effect">Blur Effect</button>
+            </div>
+            <div>
+                <h4>Stop Effect</h4>
                 <button id="stop-effect">Stop Effect</button>
             </div>
         </div>
       </div>
     <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
-  <script src="vonage-video-effects.js"></script>
+  <script src="library/vonage-video-effects.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
   <script src="index.js"></script>
 </body>

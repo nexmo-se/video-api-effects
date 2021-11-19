@@ -6,7 +6,7 @@ import { isSupported } from './utils';
 
 window.OT = window.OT || {};
 
-if (process.env.ENV === 'production') {
+if (process.env.NODE_ENV === 'production') {
     log.setLevel('WARN');
 }
 
