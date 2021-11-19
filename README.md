@@ -56,7 +56,7 @@ You can build the library locally following these steps:
 
 The VideoEffect library uses WebAssembly to run TensorFlow Lite for person segmentation. You need to serve the tflite model and binaries so they can be loaded properly. These files can be downloaded from the dist/build folder.
 
-These effects run TensorFlow Lite using MediaPipe Selfie Segmentation Landscape Model and requires Chrome's WebAssembly SIMD support in order to achieve the best performance. WebAssembly SIMD can be turned on by visiting chrome://flags on versions 84 through 90. This will be enabled by default on Chrome 91+.
+These effects run TensorFlow Lite using MediaPipe Selfie Segmentation Landscape Model and require Chrome's WebAssembly SIMD support in order to achieve the best performance. WebAssembly SIMD can be turned on by visiting chrome://flags on versions 84 through 90. This will be enabled by default on Chrome 91+.
 
  
 ### Background Blur Effect
@@ -73,13 +73,12 @@ Example:
 
 ```js
 const backgroundBlur = new BackgroundBlurEffect({
-	assetsPath: 'https://your-server-url.com/assets',
-	maskBlurRadius: 5,
-	blurFilterRadius: 15
+  assetsPath: 'https://your-server-url.com/assets',
+  maskBlurRadius: 5,
+  blurFilterRadius: 15,
 });
 await backgroundBlur.loadModel();
 backgroundBlur.startEffect(mediaTrack);
-
 ```
  
 The library adds effects on a MediaStream object. The developer needs to create the MediaStream and pass it to the library. Example:
@@ -96,37 +95,40 @@ let backgroundBlur;
 let outputVideoStream;
 
 // Create the MediaTrack with OT.getUserMedia
-
-async function getLocalTrack() {
+const getLocalTrack = async () => {
 	try {
 	  const track = await OT.getUserMedia({ audioSource: null, videoSource: true });
 	  mediaTrack = track;
 	} catch (err) {
 	  console.error('OTGetUserMedia - err', err);
 	}
-}
+};
 
-async function initBlurEffect() {
-	// Initiate the blur effect
-	backgroundBlur = new BackgroundBlurEffect({
-		assetsPath: 'https://your-server-url.com/assets'
-	});
-	await backgroundBlur.loadModel();
-	outputVideoStream = backgroundBlur.startEffect(mediaTrack);
-}
+const initBlurEffect = async () => {
+  // Initiate the blur effect
+  backgroundBlur = new BackgroundBlurEffect({
+    assetsPath: 'https://your-server-url.com/assets',
+  });
+  await backgroundBlur.loadModel();
+  outputVideoStream = backgroundBlur.startEffect(mediaTrack);
+};
 	
-async function publishToSession() {
-// Create the publisher and publish into the session
-let publisher = OT.initPublisher(
+const publishToSession = async () => {
+  // Create the publisher and publish into the session
+  const publisher = OT.initPublisher(
     'publisher',
     {
       videoSource: outputVideoStream.getVideoTracks()[0],
       width: 640,
       height: 480,
-      insertMode: 'append'
+      insertMode: 'append',
     },
     (err) => {
-      console.log('Publisher Created');
+      if (!err) {
+        console.log('Publisher Created');
+      } else {
+        console.log('Error creating a publisher', err);
+      }
     }
   );
   session = OT.initSession(apikey, sessionId);
@@ -134,37 +136,40 @@ let publisher = OT.initPublisher(
     session.subscribe(stream, (err) => {
       if (err) {
         console.log('Error while subscribing', stream);
+      } else {
+        console.log('Subscribed to ', stream); 
       }
-      console.log('Subscribed to ', stream);
     });
   });
   session.connect(token, (err) => {
     if (err) {
       console.log('Error while connecting to the session');
+      return;
     }
     console.log('Session Connected');
     session.publish(publisher, (errPublisher) => {
       if (errPublisher) {
         console.log('Error while publishing into the session');
+      } else {
+        console.log('Successfully published the stream');
       }
-      console.log('Successfully published the stream');
     });
   });
 }
 
-async function stopEffect() {
-	if (backgroundBlur){
-        backgroundBlur.stopEffect();
-        mediaTrack.getTracks().forEach((t) => t.stop());
-        publisher.destroy()
-    }
-}
+const stopEffect = async () => {
+  if (backgroundBlur) {
+    backgroundBlur.stopEffect();
+    mediaTrack.getTracks().forEach((t) => t.stop());
+    publisher.destroy();
+  }
+};
 
-async function init() {
-	await getLocalTrack();
-	await initBlurEffect();
-	await publishToSession();
-}
+const init = () => {
+  await getLocalTrack();
+  await initBlurEffect();
+  await publishToSession();
+};
 
 ```
 
