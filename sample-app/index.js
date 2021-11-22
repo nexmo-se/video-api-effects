@@ -123,7 +123,6 @@ const initVirtualBgEffect = async () => {
         backgroundImage
       }
     });
-    await virtualBgEffect.loadModel();
   } else {
     virtualBgEffect.backgroundImage = backgroundImage;
   }
