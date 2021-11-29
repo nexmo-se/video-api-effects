@@ -54,7 +54,7 @@ You can build the library locally following these steps:
 
 ### Assets
 
-The VideoEffect library uses WebAssembly to run TensorFlow Lite for person segmentation. You need to serve the tflite model and binaries so they can be loaded properly. These files can be downloaded from the dist/build folder.
+The VideoEffect library uses WebAssembly to run TensorFlow Lite for person segmentation. You need to serve the tflite model and binaries so they can be loaded properly. These files can be downloaded from the [assets](./assets) folder.
 
 These effects run TensorFlow Lite using MediaPipe Selfie Segmentation Landscape Model and requires Chrome's WebAssembly SIMD support in order to achieve the best performance. WebAssembly SIMD can be turned on by visiting chrome://flags on versions 84 through 90. This will be enabled by default on Chrome 91+.
 
