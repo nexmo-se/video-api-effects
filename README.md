@@ -50,7 +50,7 @@ You can build the library locally following these steps:
 
 1. `npm install` 
 2. `npm run build-umd`
-3. `cd example` and `npm start`. The app server will start on port 3000
+3. `cd sample-app` and `npm install`. The app server will start on port 3000
 
 ### Assets
 
