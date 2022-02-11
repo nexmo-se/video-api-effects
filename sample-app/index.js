@@ -23,7 +23,7 @@ const token =
   'T1==cGFydG5lcl9pZD00NzAwMzIzNCZzaWc9YWVkY2FmNTZjNGUzYzQwY2Y0NDg5ZDg3NDQxYThlMTc5MGIzMTY1OTpzZXNzaW9uX2lkPTFfTVg0ME56QXdNekl6Tkg1LU1UWXpOVEUxTkRneE1UUXpNbjVJVVVoalVUazFOV0ZOTW1sVVJGWnlZbkZHVlRGMWNHbC1mZyZjcmVhdGVfdGltZT0xNjM1MTU0ODIxJm5vbmNlPTAuNTA3NjgyNDEwMjUxNDk0MyZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjM3NzUwNDIwJmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9';
 
 // Same directory as the current js file
-const assetsPath = '';
+const assetsPath = '/assets';
 
 let session = null;
 let publisher = null;
@@ -117,7 +117,7 @@ const initVirtualBgEffect = async () => {
   let backgroundImage = backgrounds[options.backgroundImage];
   if (!virtualBgEffect) {
     virtualBgEffect = new VirtualBackgroundEffect({
-      assetsPath: '',
+      assetsPath: assetsPath,
       virtualBackground: {
         backgroundType: 'image',
         backgroundImage
@@ -134,7 +134,7 @@ const initVirtualBgEffect = async () => {
 const initBlurEffect = async () => {
   await createLocalTrack();
   backgroundBlur = new BackgroundBlurEffect({
-    assetsPath: ''
+    assetsPath: assetsPath
   });
   await backgroundBlur.loadModel();
   publishToSession(backgroundBlur.startEffect(mediaTrack));
