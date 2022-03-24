@@ -37,6 +37,7 @@ module.exports = {
       CLIENT_VERSION: clientVersion
     })
   ],
+  devtool: 'source-map',
   optimization: {
     minimize: true,
     minimizer: [

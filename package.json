@@ -17,7 +17,7 @@
     "clean": "rimraf dist",
     "prepare": "npm run clean && npm run build && npm run build-umd-prod",
     "prelease": "npm version prerelease --preid=rc2",
-    "watch": "npm run build:version && nodemon"
+    "watch": "npm run build && nodemon"
   },
   "engines": {
     "node": ">=14"
