@@ -61,4 +61,49 @@
      */
     None = 'None'
   }
+
+// These defs should be provided by the TS Dom typedef lib but as they are new they haven't been added yet.
+declare global {
+    /**
+     * The MediaStreamTrackProcessor interface of the Insertable Streams for MediaStreamTrack API consumes a MediaStreamTrack object's source and generates a stream of media frames.
+     */
+    interface MediaStreamTrackProcessor {
+        readonly readable: ReadableStream;
+
+    }
+
+    const MediaStreamTrackProcessor: {
+        prototype: MediaStreamTrackProcessor;
+        /**
+         * creates a new MediaStreamTrackProcessor object which consumes a MediaStreamTrack object's source and generates a stream of media frames.
+         */
+        new(options: { track: MediaStreamTrack, maxBufferSize?: number | undefined }): MediaStreamTrackProcessor;
+    };
+
+    /**
+     * The VideoFrame interface of the Web Codecs API represents a frame of a video.
+     */
+    interface VideoFrame {
+        /**
+         * Returns the width of the VideoFrame when displayed after applying aspect ratio adjustments.
+         */
+        readonly displayWidth: number;
+
+        /**
+         * Returns the height of the VideoFrame when displayed after applying aspect ratio adjustments.
+         */
+        readonly displayHeight: number;
+
+        /**
+         * Clears all states and releases the reference to the media resource.
+         */
+        close(): void;
+    }
+
+
+    interface Window {
+        MediaStreamTrackProcessor: MediaStreamTrackProcessor;
+        VideoFrame: VideoFrame;
+    }
+}
   
