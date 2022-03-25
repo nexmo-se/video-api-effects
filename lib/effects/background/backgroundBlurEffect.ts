@@ -11,14 +11,14 @@ export class BackgroundBlurEffect extends BackgroundEffect {
 
     constructor(options: BackgroundBlurEffectOptions) {
         super(options);
-        this.blurFilterRadius = options.blurFilterRadius!;
+        this.blurFilterRadius = options?.blurFilterRadius!;
     }
 
     get blurFilterRadius(): number {
         return this._blurFilterRadius;
     }
 
-    set blurFilterRadius(radius: number) {
+    set blurFilterRadius(radius: number | null | undefined) {
         if (!radius) {
             log.warn(`Valid blur filter radius not found. Using ${BLUR_FILTER_RADIUS} as default.`);
             radius = BLUR_FILTER_RADIUS;

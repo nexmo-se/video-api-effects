@@ -32,7 +32,7 @@ export abstract class BackgroundEffect {
 
     protected constructor(options: BackgroundEffectOptions) {
         log.setLevel('DEBUG');
-        this.maskBlurRadius = options.maskBlurRadius!;
+        this.maskBlurRadius = options?.maskBlurRadius;
 
         this._segmentationMaskCanvas = document.createElement('canvas');
         this._segmentationMaskCtx = this._segmentationMaskCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -65,11 +65,9 @@ export abstract class BackgroundEffect {
     /**
      * Set a new blur radius to be used when smoothing out the edges of the person's mask.
      */
-    set maskBlurRadius(radius: number) {
+    set maskBlurRadius(radius: number | null | undefined) {
         if (typeof radius !== 'number' || radius < 0) {
-            log.warn(
-                `Valid mask blur radius not found. Using ${MASK_BLUR_RADIUS} as default.`
-            );
+            log.warn(`Valid mask blur radius not found. Using ${MASK_BLUR_RADIUS} as default.`);
             radius = MASK_BLUR_RADIUS;
         }
         this._maskBlurRadius = radius;
