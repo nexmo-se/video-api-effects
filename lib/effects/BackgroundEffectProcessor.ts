@@ -82,7 +82,6 @@ export class BackgroundEffectProcessor {
     private _segmentationMaskDimensions: Dimensions;
 
     constructor(options: BackgroundEffectOptions) {
-        log.setLevel('DEBUG');
         this._useWasm = typeof options.useWasm === 'boolean' ? options.useWasm : true;
         this._outputFramesPerSecond = typeof options.frameRate === 'number' ? options.frameRate : OUTPUT_FRAMES_PER_SECOND;
         if (typeof options.assetsPath !== 'string') {
