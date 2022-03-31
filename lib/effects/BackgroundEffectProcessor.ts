@@ -105,17 +105,17 @@ export class BackgroundEffectProcessor {
     }
 
     /**
-     * Returns true if the video processing is paused
+     * Returns true if the video stream processing is paused
      */
     get paused(): boolean {
         return this._outputState === OutputState.PAUSED;
     }
 
     /**
-     * Pauses all ongoing video processing. This should be used when video isn't published to not use the CPU without any need for it.
+     * Pauses all ongoing video stream processing. This should be used when video isn't published to not use the CPU without any need for it.
      */
-    set paused(paused: boolean) {
-        this.outputState = paused ? OutputState.PAUSED : this.effectEnabled ? OutputState.EFFECT_APPLIED : OutputState.INPUT_FORWARDING;
+    pauseStreamProcessing(pause: boolean) {
+        this.setOutputState(pause ? OutputState.PAUSED : this.effectEnabled ? OutputState.EFFECT_APPLIED : OutputState.INPUT_FORWARDING);
     }
 
     /**
@@ -127,15 +127,15 @@ export class BackgroundEffectProcessor {
 
     /**
      * Enables or disables the effect on the stream returned by the startEffect method. If set to false, the input video track will simply be forwarded to the output.
-     * @param enabled defines if the effect should be applied to the returned stream
+     * @param enable defines if the effect should be applied to the returned stream
      */
-    set effectEnabled(enabled: boolean) {
-        if (this.effectEnabled === enabled) return;
+    enableEffect(enable: boolean) {
+        if (this.effectEnabled === enable) return;
 
-        this._effectEnabled = enabled;
-        log.debug('effectEnabled changed to', enabled);
+        this._effectEnabled = enable;
+        log.debug('effectEnabled changed to', enable);
         if (this._outputState !== OutputState.PAUSED)
-            this.outputState = enabled ? OutputState.EFFECT_APPLIED : OutputState.INPUT_FORWARDING;
+            this.setOutputState(enable ? OutputState.EFFECT_APPLIED : OutputState.INPUT_FORWARDING);
     }
 
     /**
@@ -157,7 +157,7 @@ export class BackgroundEffectProcessor {
     }
 
 
-    private set outputState(state: OutputState) {
+    private setOutputState(state: OutputState) {
         if (state === this._outputState) return;
         log.debug('[outputState] changed from', OutputState[this._outputState], 'to', OutputState[state]);
         this._outputState = state;
@@ -211,13 +211,13 @@ export class BackgroundEffectProcessor {
 
     /**
      * Sets / changes the input stream to the given stream. The effect will be applied to this stream and then forwarded to the ouput.
-     * @param stream
+     * @param stream the stream to use for the video input
      */
-    public set inputStream(stream: MediaStream) {
+    public setInputStream(stream: MediaStream) {
         log.debug('[inputStream] setting input stream', stream);
         if (!stream?.getVideoTracks?.()[0]) {
             log.warn('[inputStream] - Media Stream is null or doesn\'t contain any video tracks');
-            throw new Error(`Invalid input stream: ${stream}`);
+            throw new Error(`Invalid input stream is missing a video track: ${stream}`);
         }
 
         this.disconnectInputVideoElement();
@@ -259,7 +259,7 @@ export class BackgroundEffectProcessor {
         return this._outputCanvasElement.captureStream(Number(this._outputFramesPerSecond));
     }
 
-    private renderFrame(){
+    private renderFrame() {
         if (this._outputState === OutputState.EFFECT_APPLIED) {
             this._effect?.applyEffect();
             // schedule next rendering
@@ -283,7 +283,7 @@ export class BackgroundEffectProcessor {
 
     public destroy() {
         log.debug('destroy');
-        this.paused = true;
+        this.pauseStreamProcessing(true);
         this._maskFrameTimerWorker.terminate();
         this.disconnectInputVideoElement();
     }

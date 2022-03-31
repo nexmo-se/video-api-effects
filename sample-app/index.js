@@ -61,7 +61,7 @@ async function getLocalMedia() {
 
 async function createBackgroudEffectProcessor() {
     const effectProcessor = new BackgroundEffectProcessor({assetsPath});
-    effectProcessor.inputStream = await getLocalMedia();
+    effectProcessor.setInputStream(await getLocalMedia());
     return effectProcessor;
 }
 
@@ -93,7 +93,7 @@ async function publishToSession(effectProcessor) {
         if (event.stream === publisher.stream) {
             if (event.changedProperty === "hasVideo") {
                 // make sure we pause effect processing while we are not publishing video
-                effectProcessor.paused = !event.event.newValue;
+                effectProcessor.pauseStreamProcessing(!event.event.newValue);
             }
         }
     });
@@ -122,8 +122,8 @@ async function publishToSession(effectProcessor) {
     // putting it all together
     const effectProcessor = await createBackgroudEffectProcessor();
     await effectProcessor.loadEffect(new BackgroundBlurEffect());
-    effectProcessor.paused = false;
-    effectProcessor.effectEnabled = true;
+    effectProcessor.pauseStreamProcessing(false);
+    effectProcessor.enableEffect(true);
     const publisher = await publishToSession(effectProcessor);
 
     // dynamically switch to blur effect
@@ -147,7 +147,7 @@ async function publishToSession(effectProcessor) {
 
     // change the input stream e.g. when switching to a different camera
     function switchCamera(newCameraStream) {
-        effectProcessor.inputStream = newCameraStream;
+        effectProcessor.setInputStream(newCameraStream);
     }
 
     // clean up everything
@@ -159,11 +159,11 @@ async function publishToSession(effectProcessor) {
     // bind UI event listeners
 
     enableEffectButton.onclick = event => {
-        effectProcessor.effectEnabled = event.target.checked;
+        effectProcessor.enableEffect(event.target.checked);
     };
 
     pauseEffectProcessingButton.onclick = event => {
-        effectProcessor.paused = event.target.checked;
+        effectProcessor.pauseStreamProcessing(event.target.checked);
     };
 
     blurEffectConfigContainer.style.display = '';

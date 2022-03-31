@@ -85,11 +85,11 @@ const effectProcessor = new BackgroundEffectProcessor({
 await effectProcessor.loadEffect(someEffect);
 
 // pause effect processing
-effectProcessor.paused = true;
+effectProcessor.pauseStreamProcessing(true);
 // set and dynamically change the input stream the effects are applied to
-effectProcessor.inputStream = yourCameraSteam;
+effectProcessor.setInputStream(yourCameraSteam);
 // enable / disable the effect. If disabled the input stream will simply be forwarded to the output
-effectProcessor.effectEnabled = true;
+effectProcessor.enableEffect(true);
 // the output stream that has the effect applied to it and will dynamically change based on the properties above.
 effectProcessor.outputStream;
 ```
@@ -176,7 +176,7 @@ async function getLocalMedia() {
 
 async function createBackgroudEffectProcessor() {
     const effectProcessor = new BackgroundEffectsProcessor({assetsPath: 'https://your-server-url.com/assets'});
-    effectProcessor.inputStream = await getLocalMedia();
+    effectProcessor.setInputStream(await getLocalMedia());
     return effectProcessor;
 }
 
@@ -207,7 +207,7 @@ async function publishToSession(effectProcessor) {
         if (event.stream == publisher.stream) {
             if (event.changedProperty === "hasVideo") {
                 // make sure we pause effect processing while we are not publishing video
-                effectProcessor.paused = !event.event.newValue;
+                effectProcessor.pauseStreamProcessing(!event.event.newValue);
             }
         }
     });
@@ -235,7 +235,7 @@ const publisher = await publishToSession(effectProcessor);
 
 // enable disable the effect
 function toggleBackgroundEffect() {
-    effectProcessor.effectEnabled = !effectProcessor.effectEnabled;
+    effectProcessor.enableEffect(!effectProcessor.effectEnabled);
 }
 
 // dynamically switch to blur effect
@@ -261,7 +261,7 @@ async function switchToImageEffect(imageUrl) {
 
 // change the input stream e.g. when switching to a different camera
 function switchCamera(newCameraStream) {
-    effectProcessor.inputStream = newCameraStream;
+    effectProcessor.setInputStream(newCameraStream);
 }
 
 // clean up everything
