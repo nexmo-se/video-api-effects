@@ -1,6 +1,6 @@
 {
   "name": "@vonage/video-effects",
-  "version": "0.2.0",
+  "version": "1.0.0-rc1",
   "description": "Library to add video effects",
   "main": "dist/index.js",
   "repository": {
