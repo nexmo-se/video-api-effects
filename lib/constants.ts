@@ -2,6 +2,7 @@
 import { InferenceDimensions } from './types';
 
 export const BLUR_FILTER_RADIUS = 15;
+export const OUTPUT_FRAMES_PER_SECOND = 30;
 export const DEBOUNCE = 2;
 export const MASK_BLUR_RADIUS = 5;
 export const HISTORY_COUNT = 5;

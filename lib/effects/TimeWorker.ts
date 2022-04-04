@@ -36,7 +36,7 @@
   * use of setInterval that is not throttled when tab is inactive.
   */
  const code = `
-     var timer;
+     let timer;
  
      onmessage = function(request) {
          switch (request.data.id) {
