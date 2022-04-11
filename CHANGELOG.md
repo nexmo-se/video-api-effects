@@ -1,3 +1,7 @@
+# 1.0.0-rc3 (Apr 11, 2022)
+
+- removed unused dependencies (tensorflow) to reduce library size
+
 # 1.0.0-rc1 (Apr 04, 2022)
 
 - adding pausing, enable/disable effect
