@@ -1,5 +1,4 @@
 import {BackgroundEffect, BackgroundEffectOptions} from './BackgroundEffect';
-import {BLUR_FILTER_RADIUS} from '../../constants';
 import {ImageFit} from '../../types';
 import log from 'loglevel';
 

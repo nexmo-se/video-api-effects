@@ -33,12 +33,12 @@ export class VideoTrackToCanvas {
         try {
             const {done, value} = await reader.read();
             if (done) return;
-            if (!this.enabled) {
+            if (!this.enabled && value) {
                 value.close();
                 return;
             }
 
-            if (this.outputCanvasCtx != null) {
+            if (this.outputCanvasCtx != null && value) {
                 // the MediaStream video can have dynamic size
                 if (this.outputCanvasCtx.canvas.width !== value.displayWidth || this.outputCanvasCtx.canvas.height !== value.displayHeight) {
                     this.outputCanvasCtx.canvas.width = value.displayWidth;
