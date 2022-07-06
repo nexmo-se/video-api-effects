@@ -1,3 +1,7 @@
+# 1.0.0 (Jul 06, 2022)
+
+- removed logs
+
 # 1.0.0-rc3 (Apr 11, 2022)
 
 - removed unused dependencies (tensorflow) to reduce library size
