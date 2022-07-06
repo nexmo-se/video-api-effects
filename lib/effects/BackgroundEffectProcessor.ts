@@ -131,7 +131,6 @@ export class BackgroundEffectProcessor {
         if (this.effectEnabled === enable) return;
 
         this._effectEnabled = enable;
-        log.debug('effectEnabled changed to', enable);
         if (this._outputState !== OutputState.PAUSED)
             this.setOutputState(enable ? OutputState.EFFECT_APPLIED : OutputState.INPUT_FORWARDING);
     }
@@ -149,7 +148,6 @@ export class BackgroundEffectProcessor {
             this._segmentationMaskDimensions = this._useWasm ? MODEL_WASM_INFERENCE_DIMENSIONS.model144 : MODEL_WASM_INFERENCE_DIMENSIONS.model96;
             this._tflite = await loadTFLite(this._assetsPath + TFLITE_SIMD_LOADER_NAME, this._assetsPath + modelToLoad);
         }
-        log.debug('[loadEffect] effect: ', effect.constructor.name);
         this._effect = effect;
         this._effect.init(this._tflite, this._segmentationMaskDimensions, this._inputVideoElement, this._outputCanvasCtx);
     }
@@ -157,7 +155,6 @@ export class BackgroundEffectProcessor {
 
     private setOutputState(state: OutputState) {
         if (state === this._outputState) return;
-        log.debug('[outputState] changed from', OutputState[this._outputState], 'to', OutputState[state]);
         this._outputState = state;
         this.applyOutputState();
     }
@@ -171,17 +168,14 @@ export class BackgroundEffectProcessor {
         }
 
         if (this._outputState === OutputState.EFFECT_APPLIED) {
-            log.debug('[applyOutputState] triggerEffectProcessing for background effect');
             this.triggerEffectProcessing();
         }
 
         if (this._outputState === OutputState.INPUT_FORWARDING) {
             if (supportsDirectForwarding()) {
-                log.debug('[applyOutputState] forwardInputToOutput');
                 this._inputForwardEffect = new VideoTrackToCanvas(this._inputVideoTrack, this._outputCanvasCtx);
                 this._inputForwardEffect.startDirectForwardingInputToOutput();
             } else {
-                log.debug('[applyOutputState] triggerEffectProcessing for input forwarding');
                 this.triggerEffectProcessing();
             }
         }
@@ -212,7 +206,6 @@ export class BackgroundEffectProcessor {
      * @param stream the stream to use for the video input
      */
     public setInputStream(stream: MediaStream) {
-        log.debug('[inputStream] setting input stream', stream);
         if (!stream?.getVideoTracks?.()[0]) {
             log.warn('[inputStream] - Media Stream is null or doesn\'t contain any video tracks');
             throw new Error(`Invalid input stream is missing a video track: ${stream}`);
@@ -228,10 +221,6 @@ export class BackgroundEffectProcessor {
         this._inputVideoTrack = stream.getVideoTracks()[0];
         const {width, height} = this._inputVideoTrack.getSettings?.() ?? this._inputVideoTrack.getConstraints();
 
-        log.debug('[inputStream] video track settings', this._inputVideoTrack.getSettings());
-        log.debug('[inputStream] height :', height);
-        log.debug('[inputStream] width :', width);
-
         this._outputCanvasElement.width = Number(width);
         this._outputCanvasElement.height = Number(height);
 
@@ -240,14 +229,13 @@ export class BackgroundEffectProcessor {
         this._inputVideoElement.autoplay = true;
         this._inputVideoElement.srcObject = stream;
         this._inputVideoElement.onloadeddata = () => {
-            log.debug('[_inputVideoElement.onloadeddata] done');
             this.applyOutputState();
         };
 
-        log.debug('[inputStream] this._inputVideoElement.width :', this._inputVideoElement.width);
-        log.debug('[inputStream] this._inputVideoElement.height :', this._inputVideoElement.height);
-        log.debug('[inputStream] this._outputCanvasElement.width :', this._outputCanvasElement.width);
-        log.debug('[inputStream] this._outputCanvasElement.height :', this._outputCanvasElement.height);
+        // log.debug('[inputStream] this._inputVideoElement.width :', this._inputVideoElement.width);
+        // log.debug('[inputStream] this._inputVideoElement.height :', this._inputVideoElement.height);
+        // log.debug('[inputStream] this._outputCanvasElement.width :', this._outputCanvasElement.width);
+        // log.debug('[inputStream] this._outputCanvasElement.height :', this._outputCanvasElement.height);
     }
 
     /**
@@ -280,7 +268,6 @@ export class BackgroundEffectProcessor {
     }
 
     public destroy() {
-        log.debug('destroy');
         this.pauseStreamProcessing(true);
         this._maskFrameTimerWorker.terminate();
         this.disconnectInputVideoElement();

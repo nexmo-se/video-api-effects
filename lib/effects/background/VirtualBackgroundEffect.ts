@@ -73,10 +73,10 @@ export class VirtualBackgroundEffect extends BackgroundEffect {
         const canvasWidth = outputCanvasCtx.canvas.width;
         const canvasHeight = outputCanvasCtx.canvas.height;
 
-        log.debug('img width', imageWidth);
-        log.debug('img height', imageHeight);
-        log.debug('canvas - w', canvasWidth);
-        log.debug('canvas- h', canvasHeight);
+        // log.debug('img width', imageWidth);
+        // log.debug('img height', imageHeight);
+        // log.debug('canvas - w', canvasWidth);
+        // log.debug('canvas- h', canvasHeight);
 
         if (this._fitType === ImageFit.Fill) {
             outputCanvasCtx.drawImage(img, 0, 0, imageWidth, imageHeight, 0, 0, canvasWidth, canvasHeight);
