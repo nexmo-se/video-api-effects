@@ -13,7 +13,7 @@ import {
     TFLITE_SIMD_LOADER_NAME,
 } from '../constants';
 import {loadTFLite} from './TFLiteLoader';
-import {BackgroundEffect} from './background/backgroundEffect';
+import {BackgroundEffect} from './background/BackgroundEffect';
 import {supportsDirectForwarding, VideoTrackToCanvas} from './VideoTrackToCanvas';
 import {Dimensions} from '../types';
 
