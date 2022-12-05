@@ -203,15 +203,25 @@ export class BackgroundEffectProcessor {
 
     /**
      * Sets / changes the input stream to the given stream. The effect will be applied to this stream and then forwarded to the ouput.
-     * @param stream the stream to use for the video input
+     * @param stream the stream to use for the video input or null to reset it.
      */
     public setInputStream(stream: MediaStream) {
+        if(stream === this._inputStream){
+            log.debug('[inputStream] stream already set, nothing to do');
+            return;
+        }
+        
+        this.disconnectInputVideoElement();
+
+        if(!stream) return;
+
         if (!stream?.getVideoTracks?.()[0]) {
-            log.warn('[inputStream] - Media Stream is null or doesn\'t contain any video tracks');
+            log.warn('[inputStream] - Media Stream doesn\'t contain any video tracks');
             throw new Error(`Invalid input stream is missing a video track: ${stream}`);
         }
+        log.debug('[inputStream] setting input stream with ID\n', stream.id, '\ncurrent stream ID:\n', this._inputStream?.id ?? '-');
 
-        this.disconnectInputVideoElement();
+
         if (this._inputForwardEffect) {
             this._inputForwardEffect.stopDirectForwardingInputToOutput();
             this._inputForwardEffect = null;
@@ -231,17 +241,21 @@ export class BackgroundEffectProcessor {
         this._inputVideoElement.onloadeddata = () => {
             this.applyOutputState();
         };
-
-        // log.debug('[inputStream] this._inputVideoElement.width :', this._inputVideoElement.width);
-        // log.debug('[inputStream] this._inputVideoElement.height :', this._inputVideoElement.height);
-        // log.debug('[inputStream] this._outputCanvasElement.width :', this._outputCanvasElement.width);
-        // log.debug('[inputStream] this._outputCanvasElement.height :', this._outputCanvasElement.height);
     }
 
     /**
      * Returns the output stream with the effect applied to it
      */
     public get outputStream(): MediaStream {
+        if(!this._inputStream){
+            // if we don't have an input stream yet, set a default size and emit an inital frame so that open tok accepts it as a valid stream
+            setTimeout(()=>{
+                this._outputCanvasElement.width = 600;
+                this._outputCanvasElement.height = 480;
+                this._outputCanvasCtx.fillStyle = "#000000";
+                this._outputCanvasCtx.fillRect(0, 0, this._outputCanvasElement.width, this._outputCanvasElement.height);
+            }, 50);
+        }
         return this._outputCanvasElement.captureStream(Number(this._outputFramesPerSecond));
     }
 
@@ -263,8 +277,7 @@ export class BackgroundEffectProcessor {
     private disconnectInputVideoElement() {
         this._inputVideoElement.pause();
         this._inputVideoElement.srcObject = null;
-        if (this._inputVideoTrack)
-            this._inputVideoTrack.stop();
+        this._inputVideoTrack?.stop();
     }
 
     public destroy() {
